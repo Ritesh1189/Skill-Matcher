@@ -9,6 +9,7 @@ import JobDetailsModal from './components/JobDetailsModal';
 import ProfileModal from './components/ProfileModal';
 import PostJobModal from './components/PostJobModal';
 import AuthModal from './components/AuthModal';
+import AuthPage from './components/AuthPage';
 import { 
   jobsApi, 
   matchApi, 
@@ -164,6 +165,12 @@ export default function App() {
     }
   };
 
+  const handleLogout = () => {
+    setCurrentUser(null);
+    showToast('You have been signed out.');
+    setActiveTab('auth');
+  };
+
   const handleResetSeedData = async () => {
     if (!window.confirm('Reset and reload initial demonstration data (candidates, recruiters, jobs)?')) return;
     try {
@@ -213,12 +220,28 @@ export default function App() {
         setActiveTab={setActiveTab}
         onOpenProfile={() => setIsProfileModalOpen(true)}
         onOpenPostJob={() => setIsPostJobModalOpen(true)}
-        onOpenAuth={() => setIsAuthModalOpen(true)}
+        onOpenAuth={() => setActiveTab('auth')}
+        onLogout={handleLogout}
         systemHealth={systemHealth}
       />
 
       {/* Main Content Area */}
       <main style={{ flex: 1, paddingBottom: '70px' }}>
+        {activeTab === 'auth' && (
+          <AuthPage 
+            onAuthSuccess={(user) => {
+              setCurrentUser(user);
+              showToast(`Welcome, ${user.name}!`);
+              if (user.role === 'RECRUITER') {
+                setActiveTab('recruiter');
+              } else {
+                setActiveTab('jobs');
+              }
+            }}
+            onNavigateToJobs={() => setActiveTab('jobs')}
+          />
+        )}
+
         {activeTab === 'jobs' && (
           <BrowseJobs 
             jobs={jobs}
@@ -296,6 +319,17 @@ export default function App() {
             }}
           >
             Recruiter (Emma Watson)
+          </button>
+          <button
+            onClick={() => setActiveTab('auth')}
+            className="btn btn-sm"
+            style={{
+              background: activeTab === 'auth' ? '#16a34a' : '#ffffff',
+              color: activeTab === 'auth' ? '#ffffff' : '#0f172a',
+              borderColor: activeTab === 'auth' ? '#16a34a' : '#cbd5e1'
+            }}
+          >
+            Auth Page (Sign In / Register)
           </button>
           <a
             href="http://localhost:8080/swagger-ui.html"
