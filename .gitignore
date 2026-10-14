@@ -1,0 +1,21 @@
+# Dependencies and build outputs
+target/
+node_modules/
+dist/
+dist-ssr/
+
+# Environment files and credentials
+.env
+.env.local
+.env.*.local
+*.log
+
+# IDE and OS files
+.idea/
+.vscode/
+*.iml
+.DS_Store
+Thumbs.db
+
+# Maven
+.mvn/wrapper/maven-wrapper.jar
