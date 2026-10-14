@@ -184,4 +184,8 @@ public class JobService {
         }
         return memoryJobs.get(id);
     }
+
+    public void clearMemory() {
+        memoryJobs.clear();
+    }
 }

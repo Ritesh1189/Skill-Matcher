@@ -65,10 +65,12 @@ public class HealthController {
     }
 
     @PostMapping("/seed/reset")
-    @Operation(summary = "Re-seed demonstration data", description = "Restores sample candidates, recruiters, and jobs")
+    @Operation(summary = "Reset sample jobs", description = "Restores clean job listings and clears dummy profiles")
     public ResponseEntity<ApiResponse<String>> resetData() {
+        userService.clearMemory();
+        jobService.clearMemory();
         dataInitializationService.seedInitialData();
-        return ResponseEntity.ok(ApiResponse.ok("Demo data successfully synchronized", "Seeded"));
+        return ResponseEntity.ok(ApiResponse.ok("Sample jobs successfully refreshed", "Reset"));
     }
 
     @GetMapping("/meta")

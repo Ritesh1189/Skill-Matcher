@@ -24,7 +24,8 @@ export default function BrowseJobs({
   onApply, 
   candidateApplications,
   onOpenProfile,
-  onOpenPostJob
+  onOpenPostJob,
+  onNavigateToAuth
 }) {
   const [search, setSearch] = useState('');
   const [location, setLocation] = useState('');
@@ -253,6 +254,28 @@ export default function BrowseJobs({
                 ))}
               </div>
 
+              {/* Guest Match Callout */}
+              {!currentUser && (
+                <div style={{ marginTop: '16px', padding: '16px', background: '#ecfdf5', borderRadius: '10px', border: '1px solid #86efac' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+                    <Sparkles size={16} style={{ color: '#16a34a' }} />
+                    <span style={{ fontSize: '0.85rem', fontWeight: 800, color: '#166534' }}>
+                      Skill Match Score
+                    </span>
+                  </div>
+                  <p style={{ fontSize: '0.78rem', color: '#334155', lineHeight: 1.5, marginBottom: '12px' }}>
+                    Log in or create a free profile with your technical skills to see exact match percentages on all jobs.
+                  </p>
+                  <button
+                    onClick={onNavigateToAuth}
+                    className="btn btn-green btn-sm"
+                    style={{ width: '100%', justifyContent: 'center', fontWeight: 700 }}
+                  >
+                    Log In / Register
+                  </button>
+                </div>
+              )}
+
               {/* Candidate Active Skills Profile Box */}
               {isCandidate && currentUser?.skills && (
                 <div style={{ marginTop: '16px', padding: '14px', background: '#ecfdf5', borderRadius: '8px', border: '1px solid #86efac' }}>
@@ -338,6 +361,7 @@ export default function BrowseJobs({
                     hasApplied={appliedJobIds.has(job.id)}
                     isCandidate={isCandidate}
                     isRecruiter={isRecruiter}
+                    onNavigateToAuth={onNavigateToAuth}
                   />
                 ))}
               </div>

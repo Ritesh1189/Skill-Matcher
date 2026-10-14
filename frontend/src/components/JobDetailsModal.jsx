@@ -286,10 +286,24 @@ export default function JobDetailsModal({
         )}
 
         {!isCandidate && (
-          <div style={{ paddingTop: '16px', borderTop: '1px solid #e2e8f0', display: 'flex', justifyContent: 'flex-end' }}>
-            <button onClick={onClose} className="btn btn-secondary">
-              Close Details
-            </button>
+          <div style={{ paddingTop: '16px', borderTop: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '10px' }}>
+            <span style={{ fontSize: '0.8rem', color: '#64748b' }}>
+              Want to apply? Create your free profile to check your skill match and apply.
+            </span>
+            <div style={{ display: 'flex', gap: '8px' }}>
+              <button onClick={onClose} className="btn btn-secondary">
+                Close
+              </button>
+              <button 
+                onClick={() => {
+                  onClose();
+                  if (onNavigateToAuth) onNavigateToAuth();
+                }} 
+                className="btn btn-green"
+              >
+                Log In to Apply
+              </button>
+            </div>
           </div>
         )}
 

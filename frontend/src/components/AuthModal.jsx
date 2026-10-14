@@ -185,7 +185,7 @@ export default function AuthModal({ onClose, onAuthSuccess }) {
               <input
                 type="text"
                 className="form-control"
-                placeholder="e.g. Alex Chen"
+                placeholder="e.g. John Doe"
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                 required

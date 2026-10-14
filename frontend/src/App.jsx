@@ -4,32 +4,27 @@ import BrowseJobs from './components/BrowseJobs';
 import SkillMatcherCalculator from './components/SkillMatcherCalculator';
 import CandidateApplications from './components/CandidateApplications';
 import RecruiterDashboard from './components/RecruiterDashboard';
-import CandidatePool from './components/CandidatePool';
 import JobDetailsModal from './components/JobDetailsModal';
 import ProfileModal from './components/ProfileModal';
 import PostJobModal from './components/PostJobModal';
-import AuthModal from './components/AuthModal';
 import AuthPage from './components/AuthPage';
 import { 
   jobsApi, 
   matchApi, 
   applicationsApi, 
-  systemApi, 
-  authApi, 
-  candidatesApi 
+  systemApi 
 } from './services/api';
 import { 
   CheckCircle2, 
   AlertCircle, 
   RotateCcw, 
   BookOpen, 
-  ExternalLink,
-  Sparkles
+  ExternalLink
 } from 'lucide-react';
 
 export default function App() {
   const [currentUser, setCurrentUser] = useState(null);
-  const [activeTab, setActiveTab] = useState('jobs'); // 'jobs' | 'matcher' | 'candidates' | 'applications' | 'recruiter'
+  const [activeTab, setActiveTab] = useState('jobs'); // 'jobs' | 'matcher' | 'applications' | 'recruiter' | 'auth'
   const [jobs, setJobs] = useState([]);
   const [matchesByJobId, setMatchesByJobId] = useState({});
   const [candidateApplications, setCandidateApplications] = useState([]);
@@ -39,7 +34,6 @@ export default function App() {
   const [selectedJob, setSelectedJob] = useState(null);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [isPostJobModalOpen, setIsPostJobModalOpen] = useState(false);
-  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [toast, setToast] = useState(null);
 
   // Initial Boot
@@ -65,13 +59,6 @@ export default function App() {
       // 2. Fetch Jobs
       const jobsList = await jobsApi.getJobs();
       setJobs(jobsList || []);
-
-      // 3. Set default user (Alex Morgan - Candidate)
-      const candidates = await candidatesApi.getAll();
-      if (candidates && candidates.length > 0) {
-        const alex = candidates.find(c => c.email.includes('alex')) || candidates[0];
-        setCurrentUser(alex);
-      }
     } catch (err) {
       console.error('Initialization error:', err);
     }
@@ -95,36 +82,15 @@ export default function App() {
     }
   };
 
-  const handleSwitchUser = async (email) => {
-    try {
-      const candidates = await candidatesApi.getAll();
-      const targetCandidate = candidates.find(c => c.email.toLowerCase() === email.toLowerCase());
-      if (targetCandidate) {
-        setCurrentUser(targetCandidate);
-        showToast(`Switched active profile to ${targetCandidate.name} (Candidate)`);
-        return;
-      }
-
-      // Check recruiters
-      const authRes = await authApi.login({
-        email: email,
-        password: email.includes('recruiter') ? 'recruiter123' : 'password123',
-      });
-      if (authRes?.user) {
-        setCurrentUser(authRes.user);
-        showToast(`Switched active profile to ${authRes.user.name} (${authRes.user.role})`);
-        if (authRes.user.role === 'RECRUITER') {
-          setActiveTab('recruiter');
-        }
-      }
-    } catch (err) {
-      console.error('Switch user error:', err);
-    }
-  };
-
   const handleApply = async (job, coverNote) => {
-    if (!currentUser || currentUser.role !== 'CANDIDATE') {
-      setIsAuthModalOpen(true);
+    if (!currentUser) {
+      showToast('Please log in or register to apply for jobs and check your skill match.', true);
+      setActiveTab('auth');
+      return;
+    }
+
+    if (currentUser.role !== 'CANDIDATE') {
+      showToast('Only Job Seeker accounts can submit applications.', true);
       return;
     }
 
@@ -152,33 +118,32 @@ export default function App() {
   const handleJobCreated = async (newJob) => {
     setJobs(prev => [newJob, ...prev]);
     showToast(`Job opening "${newJob.title}" posted successfully!`);
-    if (currentUser?.id && currentUser.role === 'CANDIDATE') {
-      loadMatchesAndApplications(currentUser.id);
-    }
   };
 
   const handleProfileUpdated = (updatedUser) => {
     setCurrentUser(updatedUser);
     showToast('Profile and skills updated successfully!');
-    if (updatedUser?.id) {
+    if (updatedUser?.id && updatedUser.role === 'CANDIDATE') {
       loadMatchesAndApplications(updatedUser.id);
     }
   };
 
   const handleLogout = () => {
     setCurrentUser(null);
-    showToast('You have been signed out.');
-    setActiveTab('auth');
+    setMatchesByJobId({});
+    setCandidateApplications([]);
+    showToast('You have been logged out.');
+    setActiveTab('jobs');
   };
 
-  const handleResetSeedData = async () => {
-    if (!window.confirm('Reset and reload initial demonstration data (candidates, recruiters, jobs)?')) return;
+  const handleResetJobs = async () => {
+    if (!window.confirm('Reset sample job openings?')) return;
     try {
       await systemApi.resetSeedData();
-      showToast('Demonstration data successfully re-seeded!');
+      showToast('Job openings refreshed!');
       await initApp();
     } catch (err) {
-      showToast('Failed to reset data', true);
+      showToast('Failed to reset jobs', true);
     }
   };
 
@@ -192,7 +157,7 @@ export default function App() {
       
       {/* Toast Notification */}
       {toast && (
-        <div style={{ position: 'fixed', bottom: '60px', right: '24px', zIndex: 100 }}>
+        <div style={{ position: 'fixed', bottom: '24px', right: '24px', zIndex: 100 }}>
           <div style={{
             background: '#ffffff',
             border: `1px solid ${toast.isError ? '#fca5a5' : '#86efac'}`,
@@ -212,26 +177,23 @@ export default function App() {
         </div>
       )}
 
-      {/* Top Navbar (Naukri style) */}
+      {/* Top Navbar */}
       <Navbar 
         currentUser={currentUser}
-        onSwitchUser={handleSwitchUser}
         activeTab={activeTab}
         setActiveTab={setActiveTab}
         onOpenProfile={() => setIsProfileModalOpen(true)}
         onOpenPostJob={() => setIsPostJobModalOpen(true)}
-        onOpenAuth={() => setActiveTab('auth')}
         onLogout={handleLogout}
-        systemHealth={systemHealth}
       />
 
       {/* Main Content Area */}
-      <main style={{ flex: 1, paddingBottom: '70px' }}>
+      <main style={{ flex: 1, paddingBottom: '40px' }}>
         {activeTab === 'auth' && (
           <AuthPage 
             onAuthSuccess={(user) => {
               setCurrentUser(user);
-              showToast(`Welcome, ${user.name}!`);
+              showToast(`Welcome back, ${user.name}!`);
               if (user.role === 'RECRUITER') {
                 setActiveTab('recruiter');
               } else {
@@ -252,15 +214,12 @@ export default function App() {
             candidateApplications={candidateApplications}
             onOpenProfile={() => setIsProfileModalOpen(true)}
             onOpenPostJob={() => setIsPostJobModalOpen(true)}
+            onNavigateToAuth={() => setActiveTab('auth')}
           />
         )}
 
         {activeTab === 'matcher' && (
           <SkillMatcherCalculator />
-        )}
-
-        {activeTab === 'candidates' && (
-          <CandidatePool />
         )}
 
         {activeTab === 'applications' && currentUser?.role === 'CANDIDATE' && (
@@ -281,69 +240,6 @@ export default function App() {
         )}
       </main>
 
-      {/* Persistent Bottom Bar (Indeed/Naukri Testing Helper) */}
-      <div className="naukri-bottom-bar">
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#16a34a' }}></span>
-          <span style={{ fontWeight: 700, color: '#0f172a' }}>Active Profile:</span>
-          <span style={{ color: '#16a34a', fontWeight: 800 }}>
-            {currentUser?.name || 'Guest'} ({currentUser?.role})
-          </span>
-          {currentUser?.role === 'CANDIDATE' && (
-            <span style={{ color: '#64748b' }}>
-              • Skills: {currentUser.skills?.slice(0, 3).join(', ')}...
-            </span>
-          )}
-        </div>
-
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <span style={{ color: '#64748b', fontSize: '0.75rem' }}>Quick Persona Switch:</span>
-          <button
-            onClick={() => handleSwitchUser('alex.morgan@example.com')}
-            className="btn btn-sm"
-            style={{
-              background: currentUser?.email?.includes('alex') ? '#16a34a' : '#ffffff',
-              color: currentUser?.email?.includes('alex') ? '#ffffff' : '#0f172a',
-              borderColor: '#cbd5e1'
-            }}
-          >
-            Candidate (Alex Morgan)
-          </button>
-          <button
-            onClick={() => handleSwitchUser('emma.recruiter@cloudscale.io')}
-            className="btn btn-sm"
-            style={{
-              background: currentUser?.role === 'RECRUITER' ? '#16a34a' : '#ffffff',
-              color: currentUser?.role === 'RECRUITER' ? '#ffffff' : '#0f172a',
-              borderColor: '#cbd5e1'
-            }}
-          >
-            Recruiter (Emma Watson)
-          </button>
-          <button
-            onClick={() => setActiveTab('auth')}
-            className="btn btn-sm"
-            style={{
-              background: activeTab === 'auth' ? '#16a34a' : '#ffffff',
-              color: activeTab === 'auth' ? '#ffffff' : '#0f172a',
-              borderColor: activeTab === 'auth' ? '#16a34a' : '#cbd5e1'
-            }}
-          >
-            Auth Page (Sign In / Register)
-          </button>
-          <a
-            href="http://localhost:8080/swagger-ui.html"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="btn btn-sm"
-            style={{ background: '#ecfdf5', color: '#15803d', borderColor: '#86efac' }}
-          >
-            <BookOpen size={13} />
-            <span>Swagger Docs</span>
-          </a>
-        </div>
-      </div>
-
       {/* Modals */}
       {selectedJob && (
         <JobDetailsModal 
@@ -353,6 +249,10 @@ export default function App() {
           onApply={handleApply}
           hasApplied={candidateApplications.some(a => a.jobId === selectedJob.id)}
           isCandidate={currentUser?.role === 'CANDIDATE'}
+          onNavigateToAuth={() => {
+            setSelectedJob(null);
+            setActiveTab('auth');
+          }}
         />
       )}
 
@@ -372,32 +272,22 @@ export default function App() {
         />
       )}
 
-      {isAuthModalOpen && (
-        <AuthModal 
-          onClose={() => setIsAuthModalOpen(false)}
-          onAuthSuccess={(user) => {
-            setCurrentUser(user);
-            showToast(`Welcome, ${user.name}!`);
-          }}
-        />
-      )}
-
-      {/* Footer (Naukri style clean footer) */}
-      <footer style={{ background: '#ffffff', borderTop: '1px solid #e2e8f0', padding: '24px 20px', fontSize: '0.8rem', color: '#64748b', marginBottom: '40px' }}>
-        <div style={{ maxWidth: '1280px', margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+      {/* Simple, Professional Footer */}
+      <footer style={{ background: '#ffffff', borderTop: '1px solid #e2e8f0', padding: '24px 20px', fontSize: '0.85rem', color: '#64748b' }}>
+        <div style={{ maxWidth: '1280px', margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
             <span style={{ fontWeight: 800, color: '#0f172a' }}>SkillMatch Portal</span>
             <span>•</span>
-            <span>Inspired by Naukri & Indeed Recruitment Standards</span>
+            <span>Intelligent Skill-Based Hiring Platform</span>
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
             <button
-              onClick={handleResetSeedData}
-              style={{ background: 'none', border: 'none', color: '#64748b', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.8rem' }}
+              onClick={handleResetJobs}
+              style={{ background: 'none', border: 'none', color: '#64748b', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '5px', fontSize: '0.8rem' }}
             >
               <RotateCcw size={13} />
-              Reset Demo Data
+              Reset Sample Jobs
             </button>
             <a 
               href="http://localhost:8080/swagger-ui.html"
@@ -405,7 +295,8 @@ export default function App() {
               rel="noopener noreferrer"
               style={{ color: '#16a34a', fontWeight: 600, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '4px' }}
             >
-              Swagger REST API
+              <BookOpen size={14} />
+              API Documentation
               <ExternalLink size={12} />
             </a>
           </div>

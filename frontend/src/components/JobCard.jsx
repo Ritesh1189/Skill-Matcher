@@ -78,13 +78,36 @@ export default function JobCard({
           </div>
         </div>
 
-        {/* Naukri-style Match Score Pill */}
-        {isCandidate && matchResult && (
+        {/* Match Score Badge */}
+        {isCandidate && matchResult ? (
           <div className={`naukri-match-score-badge ${scoreClass}`}>
             <Sparkles size={12} />
             <span>{score}% Match</span>
           </div>
-        )}
+        ) : !isRecruiter ? (
+          <div 
+            onClick={(e) => {
+              e.stopPropagation();
+              onApply(job);
+            }}
+            style={{
+              background: '#f8fafc',
+              border: '1px solid #e2e8f0',
+              borderRadius: '9999px',
+              padding: '4px 10px',
+              fontSize: '0.72rem',
+              color: '#64748b',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '4px'
+            }}
+            title="Log in to see your personalized match percentage"
+          >
+            <Sparkles size={12} style={{ color: '#16a34a' }} />
+            <span>Check Match %</span>
+          </div>
+        ) : null}
 
         {isRecruiter && (
           <div 
@@ -184,7 +207,7 @@ export default function JobCard({
             <ArrowRight size={13} />
           </button>
 
-          {isCandidate && (
+          {isCandidate ? (
             hasApplied ? (
               <span 
                 style={{ 
@@ -215,7 +238,18 @@ export default function JobCard({
                 Easy Apply
               </button>
             )
-          )}
+          ) : !isRecruiter ? (
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                onApply(job);
+              }}
+              className="btn btn-green btn-sm"
+            >
+              Apply Now
+            </button>
+          ) : null}
         </div>
       </div>
 
