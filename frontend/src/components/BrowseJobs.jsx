@@ -8,8 +8,12 @@ import {
   SlidersHorizontal, 
   CheckCircle2, 
   RotateCcw,
+  Check,
+  X,
+  Plus,
   Layers,
-  ChevronDown
+  Award,
+  AlertTriangle
 } from 'lucide-react';
 import JobCard from './JobCard';
 
@@ -28,7 +32,7 @@ export default function BrowseJobs({
   const [jobType, setJobType] = useState('All');
   const [experienceLevel, setExperienceLevel] = useState('All');
   const [minMatch, setMinMatch] = useState(0); // 0, 50, 80
-  const [sortBy, setSortBy] = useState('match'); // 'match', 'newest'
+  const [sortBy, setSortBy] = useState('match');
 
   const isCandidate = currentUser?.role === 'CANDIDATE';
   const isRecruiter = currentUser?.role === 'RECRUITER';
@@ -38,10 +42,34 @@ export default function BrowseJobs({
     return new Set(candidateApplications.map(a => a.jobId));
   }, [candidateApplications]);
 
+  // Compute stats for candidate
+  const candidateStats = useMemo(() => {
+    let strong = 0;
+    let moderate = 0;
+    let low = 0;
+    const allMissingSkills = new Set();
+
+    jobs.forEach(j => {
+      const match = matchesByJobId[j.id];
+      const score = match?.matchPercentage ?? 0;
+      if (score >= 70) strong++;
+      else if (score >= 50) moderate++;
+      else low++;
+
+      (match?.missingSkills || []).forEach(s => allMissingSkills.add(s));
+    });
+
+    return {
+      strong,
+      moderate,
+      low,
+      missingSkillsCount: allMissingSkills.size,
+    };
+  }, [jobs, matchesByJobId]);
+
   // Filtered & Sorted Jobs
   const filteredJobs = useMemo(() => {
     return jobs.filter(job => {
-      // Search text
       if (search.trim()) {
         const q = search.toLowerCase().trim();
         const matchesTitle = job.title?.toLowerCase().includes(q);
@@ -51,22 +79,18 @@ export default function BrowseJobs({
         if (!matchesTitle && !matchesCompany && !matchesSkill && !matchesDesc) return false;
       }
 
-      // Location
       if (location.trim()) {
         if (!job.location?.toLowerCase().includes(location.toLowerCase().trim())) return false;
       }
 
-      // Job Type
       if (jobType !== 'All') {
         if (!job.type?.toLowerCase().includes(jobType.toLowerCase())) return false;
       }
 
-      // Experience Level
       if (experienceLevel !== 'All') {
         if (!job.experienceLevel?.toLowerCase().includes(experienceLevel.toLowerCase())) return false;
       }
 
-      // Minimum Match Filter (if candidate)
       if (isCandidate && minMatch > 0) {
         const match = matchesByJobId[job.id];
         const score = match?.matchPercentage ?? 0;
@@ -96,72 +120,92 @@ export default function BrowseJobs({
   return (
     <div className="space-y-6">
       
-      {/* Hero Header Banner */}
-      <div className="glass-panel p-6 sm:p-8 rounded-3xl border-indigo-500/20 relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-br from-indigo-500/15 via-purple-500/10 to-transparent rounded-full blur-3xl pointer-events-none"></div>
+      {/* Hero Banner: Green, White, and Red Metrics */}
+      <div className="glass-panel p-6 sm:p-8 rounded-3xl border-emerald-500/30 relative overflow-hidden bg-gradient-to-br from-slate-900 via-slate-900 to-emerald-950/40">
+        
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+          <div className="max-w-2xl">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 text-xs font-bold uppercase tracking-wider mb-3">
+              <Sparkles size={14} className="text-emerald-400" />
+              <span>Skill-Matched Opportunities</span>
+            </div>
 
-        <div className="max-w-3xl">
-          <div className="flex items-center gap-2 mb-3">
-            <span className="text-xs font-bold uppercase tracking-wider px-3 py-1 rounded-full bg-indigo-500/15 text-indigo-300 border border-indigo-500/30 flex items-center gap-1.5">
-              <Sparkles size={13} className="text-amber-400" />
-              <span>Skill Match Scoring Active</span>
-            </span>
-            {isCandidate && (
-              <span className="text-xs text-slate-400">
-                Matches calculated using your profile skills
-              </span>
+            <h1 className="text-3xl sm:text-4xl font-black text-white tracking-tight mb-2">
+              Find Jobs Matching <span className="text-emerald-400">Your Skills</span>
+            </h1>
+
+            <p className="text-xs sm:text-sm text-slate-300 leading-relaxed mb-4">
+              Real-time overlap comparison between candidate proficiencies (<span className="text-emerald-400 font-bold">Green Matches</span>) and employer requirements (<span className="text-red-400 font-bold">Red Skill Gaps</span>).
+            </p>
+
+            {/* Interactive Candidate Skills Pills */}
+            {isCandidate && currentUser?.skills && (
+              <div className="pt-3 border-t border-white/10 flex items-center gap-2 flex-wrap">
+                <span className="text-xs font-bold text-white">Your Listed Skills:</span>
+                {currentUser.skills.map((skill, idx) => (
+                  <span key={idx} className="skill-chip matched text-xs">
+                    <Check size={11} className="stroke-[3]" />
+                    <span>{skill}</span>
+                  </span>
+                ))}
+                <button
+                  onClick={onOpenProfile}
+                  className="text-xs font-bold text-emerald-400 hover:text-emerald-300 underline underline-offset-4 ml-1"
+                >
+                  + Add / Edit Skills
+                </button>
+              </div>
             )}
           </div>
 
-          <h1 className="text-2xl sm:text-4xl font-extrabold text-white tracking-tight mb-3">
-            Find Open Roles Matched To Your Skills
-          </h1>
-          <p className="text-sm text-slate-300 leading-relaxed">
-            Our Spring Boot algorithmic matching engine compares your listed proficiencies against job requirements with exact match percentages and transparent gap analyses.
-          </p>
-
-          {/* Active Candidate Skills Bar */}
-          {isCandidate && currentUser?.skills && (
-            <div className="mt-5 pt-4 border-t border-slate-800/80 flex items-center justify-between gap-3 flex-wrap">
-              <div className="flex items-center gap-1.5 flex-wrap">
-                <span className="text-xs text-slate-400 font-semibold mr-1">Your Skills:</span>
-                {currentUser.skills.map((skill, idx) => (
-                  <span key={idx} className="skill-chip matched text-xs">
-                    {skill}
-                  </span>
-                ))}
+          {/* Metric Badges (Green, White, Red) */}
+          {isCandidate && (
+            <div className="grid grid-cols-3 gap-3 shrink-0">
+              {/* Total Jobs */}
+              <div className="p-3.5 rounded-2xl bg-slate-950/70 border border-white/15 text-center">
+                <div className="text-[11px] font-bold uppercase tracking-wider text-slate-300">Total Open</div>
+                <div className="text-2xl font-black text-white mt-0.5">{jobs.length}</div>
+                <div className="text-[10px] text-slate-400">Roles</div>
               </div>
 
-              <button
-                onClick={onOpenProfile}
-                className="text-xs font-semibold text-indigo-400 hover:text-indigo-300 underline underline-offset-4"
-              >
-                + Edit Skills
-              </button>
+              {/* Strong Matches (Green) */}
+              <div className="p-3.5 rounded-2xl bg-emerald-950/40 border border-emerald-500/40 text-center shadow-lg shadow-emerald-950/30">
+                <div className="text-[11px] font-bold uppercase tracking-wider text-emerald-400">Strong Match</div>
+                <div className="text-2xl font-black text-emerald-300 mt-0.5">{candidateStats.strong}</div>
+                <div className="text-[10px] text-emerald-400 font-semibold">≥ 70% Match</div>
+              </div>
+
+              {/* Skill Gaps (Red) */}
+              <div className="p-3.5 rounded-2xl bg-red-950/40 border border-red-500/40 text-center shadow-lg shadow-red-950/30">
+                <div className="text-[11px] font-bold uppercase tracking-wider text-red-400">Gaps To Learn</div>
+                <div className="text-2xl font-black text-red-300 mt-0.5">{candidateStats.missingSkillsCount}</div>
+                <div className="text-[10px] text-red-400 font-semibold">Missing Skills</div>
+              </div>
             </div>
           )}
         </div>
+
       </div>
 
-      {/* Filter and Search Bar */}
-      <div className="glass-panel p-5 rounded-2xl border-slate-800 space-y-4">
+      {/* Interactive Search & Filter Console */}
+      <div className="glass-panel p-5 rounded-2xl border-white/10 space-y-4">
+        
+        {/* Row 1: Keyword, Location, Type, Level */}
         <div className="grid grid-cols-1 md:grid-cols-12 gap-3">
           
-          {/* Main Keyword Search */}
           <div className="md:col-span-5 relative">
             <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
             <input
               type="text"
               className="form-control pl-10"
-              placeholder="Search by job title, company, or skill (e.g. Java, React)..."
+              placeholder="Search by job title, company, or technical skill (Java, React)..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
             />
           </div>
 
-          {/* Location */}
           <div className="md:col-span-3 relative">
-            <MapPin size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+            <MapPin size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-emerald-400" />
             <input
               type="text"
               className="form-control pl-10"
@@ -171,7 +215,6 @@ export default function BrowseJobs({
             />
           </div>
 
-          {/* Job Type */}
           <div className="md:col-span-2">
             <select
               className="form-control cursor-pointer"
@@ -187,7 +230,6 @@ export default function BrowseJobs({
             </select>
           </div>
 
-          {/* Experience Level */}
           <div className="md:col-span-2">
             <select
               className="form-control cursor-pointer"
@@ -204,39 +246,43 @@ export default function BrowseJobs({
 
         </div>
 
-        {/* Second Row: Match Score Filter & Sorting */}
-        <div className="pt-3 border-t border-slate-800/80 flex flex-col sm:flex-row sm:items-center justify-between gap-3 flex-wrap text-xs">
+        {/* Row 2: Match Level Pills (Green/Red) & Sort */}
+        <div className="pt-3 border-t border-white/10 flex flex-col sm:flex-row sm:items-center justify-between gap-3 flex-wrap text-xs">
           
-          {/* Match Score Quick Buttons (For Candidates) */}
           {isCandidate && (
             <div className="flex items-center gap-2 flex-wrap">
-              <span className="font-semibold text-slate-400 flex items-center gap-1">
-                <SlidersHorizontal size={13} />
-                <span>Match Score:</span>
+              <span className="font-bold text-slate-300 flex items-center gap-1">
+                <SlidersHorizontal size={13} className="text-emerald-400" />
+                <span>Filter Match:</span>
               </span>
+
               <button
                 onClick={() => setMinMatch(0)}
-                className={`px-3 py-1 rounded-full transition-all ${
-                  minMatch === 0 ? 'bg-indigo-600 text-white font-bold' : 'bg-slate-800 text-slate-400 hover:text-white'
+                className={`px-3 py-1 rounded-full font-bold transition-all ${
+                  minMatch === 0 ? 'bg-white text-slate-900 shadow-md' : 'bg-slate-800 text-slate-300 hover:text-white'
                 }`}
               >
-                All Jobs
+                All Jobs ({jobs.length})
               </button>
+
               <button
                 onClick={() => setMinMatch(50)}
-                className={`px-3 py-1 rounded-full transition-all flex items-center gap-1 ${
-                  minMatch === 50 ? 'bg-amber-600 text-white font-bold shadow-md shadow-amber-500/20' : 'bg-slate-800 text-amber-400 hover:bg-slate-700'
+                className={`px-3 py-1 rounded-full font-bold transition-all flex items-center gap-1 ${
+                  minMatch === 50 ? 'bg-amber-600 text-white shadow-md' : 'bg-slate-800 text-amber-300 hover:bg-slate-700'
                 }`}
               >
                 <span>≥ 50% Match</span>
               </button>
+
               <button
                 onClick={() => setMinMatch(80)}
-                className={`px-3 py-1 rounded-full transition-all flex items-center gap-1 ${
-                  minMatch === 80 ? 'bg-emerald-600 text-white font-bold shadow-md shadow-emerald-500/20' : 'bg-slate-800 text-emerald-400 hover:bg-slate-700'
+                className={`px-3 py-1 rounded-full font-bold transition-all flex items-center gap-1 ${
+                  minMatch === 80 
+                    ? 'bg-emerald-600 text-white shadow-md shadow-emerald-600/30 ring-2 ring-emerald-400' 
+                    : 'bg-emerald-950/60 text-emerald-300 hover:bg-emerald-900/60 border border-emerald-500/30'
                 }`}
               >
-                <Sparkles size={11} />
+                <CheckCircle2 size={12} />
                 <span>≥ 80% Strong Match</span>
               </button>
             </div>
@@ -244,25 +290,25 @@ export default function BrowseJobs({
 
           {/* Results count & Sort */}
           <div className="flex items-center gap-3 ml-auto">
-            <span className="text-slate-400">
-              Showing <span className="font-bold text-white">{filteredJobs.length}</span> positions
+            <span className="text-slate-300">
+              Showing <span className="font-bold text-white text-sm">{filteredJobs.length}</span> positions
             </span>
 
             {isCandidate && (
               <select
-                className="bg-slate-800 text-xs rounded-lg px-2.5 py-1 border border-slate-700 text-slate-300 focus:outline-none"
+                className="bg-slate-800 text-xs rounded-lg px-2.5 py-1.5 border border-white/20 text-white font-medium focus:outline-none"
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value)}
               >
-                <option value="match">Sort by: Highest Match %</option>
-                <option value="newest">Sort by: Newest Openings</option>
+                <option value="match">Sort: Highest Match Score</option>
+                <option value="newest">Sort: Newest Openings</option>
               </select>
             )}
 
             {(search || location || jobType !== 'All' || experienceLevel !== 'All' || minMatch > 0) && (
               <button
                 onClick={resetFilters}
-                className="text-slate-400 hover:text-white flex items-center gap-1 ml-1"
+                className="px-2.5 py-1 rounded-lg bg-red-950/50 hover:bg-red-900/60 text-red-300 border border-red-500/30 font-semibold flex items-center gap-1"
                 title="Reset all filters"
               >
                 <RotateCcw size={12} />
@@ -277,13 +323,13 @@ export default function BrowseJobs({
 
       {/* Jobs Grid */}
       {filteredJobs.length === 0 ? (
-        <div className="glass-panel p-12 text-center rounded-3xl border-slate-800">
-          <Briefcase size={36} className="mx-auto text-slate-600 mb-3" />
-          <h3 className="text-lg font-bold text-white mb-1">No Jobs Matched Your Filters</h3>
-          <p className="text-xs text-slate-400 max-w-md mx-auto mb-4">
-            Try adjusting your search criteria, widening the minimum match score, or clearing active filters.
+        <div className="glass-panel p-12 text-center rounded-3xl border-white/10">
+          <Briefcase size={40} className="mx-auto text-slate-600 mb-3" />
+          <h3 className="text-xl font-bold text-white mb-1">No Jobs Match Your Filters</h3>
+          <p className="text-xs text-slate-400 max-w-md mx-auto mb-5">
+            Try adjusting your search criteria, widening the minimum match score, or resetting the active filters.
           </p>
-          <button onClick={resetFilters} className="btn btn-sm btn-secondary">
+          <button onClick={resetFilters} className="btn btn-red btn-sm">
             Reset Filters
           </button>
         </div>

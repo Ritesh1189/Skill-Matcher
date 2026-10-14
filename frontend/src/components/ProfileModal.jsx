@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, Save, Plus, Tag, Check } from 'lucide-react';
+import { X, Save, Plus, Tag, Check, Sparkles, User, Briefcase, GraduationCap, MapPin } from 'lucide-react';
 import { candidatesApi } from '../services/api';
 
 const POPULAR_SKILLS = [
@@ -62,23 +62,28 @@ export default function ProfileModal({ user, onClose, onProfileUpdated }) {
   return (
     <div className="modal-overlay" onClick={onClose}>
       <div 
-        className="modal-content relative p-6 sm:p-8 max-w-2xl"
+        className="modal-content relative p-6 sm:p-8 max-w-2xl border-2 border-white/20 bg-slate-900 shadow-2xl"
         onClick={(e) => e.stopPropagation()}
       >
         <button 
           onClick={onClose}
-          className="absolute top-5 right-5 p-2 rounded-lg bg-slate-800 text-slate-400 hover:text-white"
+          className="absolute top-5 right-5 p-2 rounded-xl bg-slate-800 text-white hover:bg-red-500 hover:text-white transition-all"
         >
           <X size={18} />
         </button>
 
-        <h2 className="text-xl font-bold text-white mb-1">Edit Candidate Profile & Skills</h2>
-        <p className="text-xs text-slate-400 mb-6">
-          Keep your skills and experience up to date to improve your algorithmic job match scores.
+        <div className="flex items-center gap-2 mb-1">
+          <div className="w-8 h-8 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center border border-emerald-500/30">
+            <User size={18} />
+          </div>
+          <h2 className="text-xl sm:text-2xl font-black text-white">Edit Candidate Profile & Skills</h2>
+        </div>
+        <p className="text-xs text-slate-300 mb-5">
+          Updating your skills immediately recomputes your match percentages across all listed job openings.
         </p>
 
         {error && (
-          <div className="p-3 mb-4 rounded-xl bg-rose-950/40 border border-rose-500/40 text-rose-300 text-xs">
+          <div className="p-3.5 mb-4 rounded-xl bg-red-950/60 border-2 border-red-500 text-red-200 text-xs font-bold">
             {error}
           </div>
         )}
@@ -86,7 +91,7 @@ export default function ProfileModal({ user, onClose, onProfileUpdated }) {
         <form onSubmit={handleSubmit} className="space-y-4 text-xs">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="form-label">Full Name</label>
+              <label className="form-label">Full Name *</label>
               <input
                 type="text"
                 className="form-control"
@@ -96,13 +101,14 @@ export default function ProfileModal({ user, onClose, onProfileUpdated }) {
               />
             </div>
             <div>
-              <label className="form-label">Professional Headline / Title</label>
+              <label className="form-label">Professional Headline / Title *</label>
               <input
                 type="text"
                 className="form-control"
                 value={formData.title}
                 onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                 placeholder="e.g. Senior Full-Stack Engineer"
+                required
               />
             </div>
           </div>
@@ -132,42 +138,61 @@ export default function ProfileModal({ user, onClose, onProfileUpdated }) {
           </div>
 
           <div>
-            <label className="form-label">Education / University</label>
+            <label className="form-label">Education / University Degree</label>
             <input
               type="text"
               className="form-control"
               value={formData.education}
               onChange={(e) => setFormData({ ...formData, education: e.target.value })}
-              placeholder="e.g. B.S. in Computer Science"
+              placeholder="e.g. B.S. in Computer Science, Stanford University"
             />
           </div>
 
           <div>
-            <label className="form-label">Professional Summary & Bio</label>
+            <label className="form-label">Professional Summary / Bio</label>
             <textarea
               rows="3"
               className="form-control"
               value={formData.bio}
               onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
-              placeholder="Brief summary of your background, passions, and achievements..."
+              placeholder="Brief summary of your background, architectural experience, and career goals..."
             />
           </div>
 
-          {/* Skill Tag Manager */}
-          <div className="p-4 rounded-xl bg-slate-900 border border-slate-800 space-y-3">
+          {/* SKILLS SECTION: Green highlighted with 1-click toggles */}
+          <div className="p-4 rounded-2xl bg-emerald-950/30 border-2 border-emerald-500/40 space-y-3">
             <div className="flex items-center justify-between">
-              <label className="form-label text-indigo-400 mb-0">
-                Your Technical Skills ({formData.skills.length})
-              </label>
-              <span className="text-[11px] text-slate-500">Skills are used for job matching score</span>
+              <div>
+                <label className="form-label text-emerald-400 font-extrabold flex items-center gap-1.5">
+                  <Sparkles size={14} />
+                  <span>Technical Skills ({formData.skills.length})</span>
+                </label>
+                <p className="text-[11px] text-slate-300">
+                  These skills are cross-referenced with job requirements for automated scoring.
+                </p>
+              </div>
             </div>
 
-            {/* Custom Input */}
+            <div className="flex flex-wrap gap-1.5 min-h-[36px]">
+              {formData.skills.map((skill, index) => (
+                <span key={index} className="skill-chip matched text-xs font-bold">
+                  {skill}
+                  <button
+                    type="button"
+                    onClick={() => removeSkill(skill)}
+                    className="hover:text-red-400 p-0.5 rounded-full"
+                  >
+                    <X size={12} />
+                  </button>
+                </span>
+              ))}
+            </div>
+
             <div className="flex gap-2">
               <input
                 type="text"
                 className="form-control"
-                placeholder="Type a skill (e.g. Docker, MongoDB, React) and press Add"
+                placeholder="Type new skill and press Enter (e.g. Kafka, Redis, Vue.js)..."
                 value={newSkill}
                 onChange={(e) => setNewSkill(e.target.value)}
                 onKeyDown={(e) => {
@@ -180,48 +205,34 @@ export default function ProfileModal({ user, onClose, onProfileUpdated }) {
               <button
                 type="button"
                 onClick={() => addSkill(newSkill)}
-                className="btn btn-primary btn-sm shrink-0"
+                className="btn btn-green text-xs font-bold shrink-0"
               >
-                <Plus size={14} /> Add
+                <Plus size={14} />
+                Add
               </button>
             </div>
 
-            {/* Current Skills list */}
-            <div className="flex flex-wrap gap-1.5 min-h-[36px] p-2 rounded-lg bg-slate-950/60 border border-slate-800">
-              {formData.skills.length === 0 ? (
-                <span className="text-slate-500 text-xs italic">No skills listed yet. Add some below.</span>
-              ) : (
-                formData.skills.map((skill, idx) => (
-                  <span key={idx} className="skill-chip matched text-xs">
-                    <span>{skill}</span>
-                    <button
-                      type="button"
-                      onClick={() => removeSkill(skill)}
-                      className="hover:text-rose-400 text-slate-400 ml-1"
-                    >
-                      ×
-                    </button>
-                  </span>
-                ))
-              )}
-            </div>
-
-            {/* Quick Suggestions */}
+            {/* Quick Skills Selector */}
             <div>
-              <span className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider block mb-1.5">
-                Suggested Skills to Add:
-              </span>
+              <span className="text-[11px] text-slate-300 font-semibold block mb-1">Click to toggle skills:</span>
               <div className="flex flex-wrap gap-1">
-                {POPULAR_SKILLS.filter(s => !formData.skills.some(cur => cur.toLowerCase() === s.toLowerCase())).slice(0, 10).map((skill, i) => (
-                  <button
-                    key={i}
-                    type="button"
-                    onClick={() => addSkill(skill)}
-                    className="text-[11px] px-2 py-0.5 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700/60 transition-colors flex items-center gap-1"
-                  >
-                    <Plus size={10} /> {skill}
-                  </button>
-                ))}
+                {POPULAR_SKILLS.map((s, idx) => {
+                  const has = formData.skills.some(sk => sk.toLowerCase() === s.toLowerCase());
+                  return (
+                    <button
+                      key={idx}
+                      type="button"
+                      onClick={() => has ? removeSkill(s) : addSkill(s)}
+                      className={`px-2.5 py-0.5 rounded-full text-[11px] font-bold transition-all border ${
+                        has 
+                          ? 'bg-emerald-500 text-white border-emerald-400' 
+                          : 'bg-white/10 text-slate-300 border-white/15 hover:bg-white/20 hover:text-white'
+                      }`}
+                    >
+                      {has ? '✓ ' : '+ '}{s}
+                    </button>
+                  );
+                })}
               </div>
             </div>
           </div>
@@ -234,7 +245,7 @@ export default function ProfileModal({ user, onClose, onProfileUpdated }) {
                 className="form-control"
                 value={formData.githubUrl}
                 onChange={(e) => setFormData({ ...formData, githubUrl: e.target.value })}
-                placeholder="https://github.com/..."
+                placeholder="https://github.com/yourhandle"
               />
             </div>
             <div>
@@ -244,21 +255,22 @@ export default function ProfileModal({ user, onClose, onProfileUpdated }) {
                 className="form-control"
                 value={formData.linkedinUrl}
                 onChange={(e) => setFormData({ ...formData, linkedinUrl: e.target.value })}
-                placeholder="https://linkedin.com/in/..."
+                placeholder="https://linkedin.com/in/yourhandle"
               />
             </div>
           </div>
 
-          <div className="pt-4 border-t border-slate-800 flex justify-end gap-3">
-            <button type="button" onClick={onClose} className="btn btn-secondary">
+          <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-800">
+            <button type="button" onClick={onClose} className="btn btn-secondary font-bold">
               Cancel
             </button>
-            <button type="submit" disabled={saving} className="btn btn-primary">
-              <Save size={15} />
-              <span>{saving ? 'Saving...' : 'Save Profile Changes'}</span>
+            <button type="submit" disabled={saving} className="btn btn-green font-black sm:btn-lg">
+              <Save size={16} />
+              <span>{saving ? 'Saving Profile...' : 'Save Profile Changes'}</span>
             </button>
           </div>
         </form>
+
       </div>
     </div>
   );

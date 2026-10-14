@@ -26,7 +26,10 @@ import {
   Database,
   Cpu,
   Layers,
-  Sparkles
+  Sparkles,
+  UserCheck,
+  Briefcase,
+  Users
 } from 'lucide-react';
 
 export default function App() {
@@ -191,13 +194,13 @@ export default function App() {
       
       {/* Toast Notification */}
       {toast && (
-        <div className="fixed bottom-6 right-6 z-50 animate-fadeIn">
-          <div className={`p-4 rounded-xl border text-xs font-semibold flex items-center gap-2.5 shadow-2xl backdrop-blur-xl ${
+        <div className="fixed bottom-20 right-6 z-50 animate-fadeIn">
+          <div className={`p-4 rounded-2xl border text-xs font-bold flex items-center gap-3 shadow-2xl backdrop-blur-xl ${
             toast.isError 
-              ? 'bg-rose-950/90 border-rose-500/50 text-rose-200' 
-              : 'bg-emerald-950/90 border-emerald-500/50 text-emerald-200'
+              ? 'bg-red-950/95 border-red-500 text-red-200' 
+              : 'bg-emerald-950/95 border-emerald-500 text-emerald-200'
           }`}>
-            {toast.isError ? <AlertCircle size={16} /> : <CheckCircle2 size={16} className="text-emerald-400" />}
+            {toast.isError ? <AlertCircle size={18} className="text-red-400" /> : <CheckCircle2 size={18} className="text-emerald-400" />}
             <span>{toast.message}</span>
           </div>
         </div>
@@ -216,7 +219,7 @@ export default function App() {
       />
 
       {/* Main Content View */}
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 md:px-8 pb-16">
+      <main className="flex-1 max-w-7xl w-full mx-auto px-4 md:px-8 pb-24">
         {activeTab === 'jobs' && (
           <BrowseJobs 
             jobs={jobs}
@@ -255,6 +258,64 @@ export default function App() {
           />
         )}
       </main>
+
+      {/* Persistent Bottom Quick-Switch Bar for Real-Time Role Testing */}
+      <div className="fixed bottom-0 inset-x-0 bg-slate-950/95 border-t border-white/20 backdrop-blur-xl z-40 py-2.5 px-4 shadow-2xl">
+        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
+          
+          <div className="flex items-center gap-2">
+            <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+            <span className="text-white font-extrabold uppercase tracking-wider text-[11px]">Active Persona:</span>
+            <span className={`px-2.5 py-0.5 rounded-full font-black text-xs ${
+              currentUser?.role === 'CANDIDATE' 
+                ? 'bg-emerald-500 text-white' 
+                : 'bg-white text-slate-950'
+            }`}>
+              {currentUser?.name || 'Guest'} ({currentUser?.role || 'Visitor'})
+            </span>
+            {currentUser?.role === 'CANDIDATE' && (
+              <span className="text-slate-400 hidden md:inline text-[11px]">
+                • Skills: {currentUser.skills?.slice(0, 3).join(', ')}...
+              </span>
+            )}
+          </div>
+
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className="text-slate-400 font-semibold text-[11px]">1-Click Switch:</span>
+            <button
+              onClick={() => handleSwitchUser('alex.chen@example.com')}
+              className={`px-3 py-1 rounded-full text-xs font-bold transition-all border ${
+                currentUser?.email?.includes('alex')
+                  ? 'bg-emerald-500 text-white border-emerald-400 shadow-sm shadow-emerald-500/40'
+                  : 'bg-white/10 text-slate-300 border-white/15 hover:bg-white/20 hover:text-white'
+              }`}
+            >
+              Candidate (Alex Chen)
+            </button>
+            <button
+              onClick={() => handleSwitchUser('recruiter@techmatch.com')}
+              className={`px-3 py-1 rounded-full text-xs font-bold transition-all border ${
+                currentUser?.role === 'RECRUITER'
+                  ? 'bg-white text-slate-950 border-white shadow-sm font-black'
+                  : 'bg-white/10 text-slate-300 border-white/15 hover:bg-white/20 hover:text-white'
+              }`}
+            >
+              Recruiter (Emma Watson)
+            </button>
+            <a
+              href="http://localhost:8080/swagger-ui.html"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="px-3 py-1 rounded-full text-xs font-black bg-emerald-950/60 text-emerald-300 border border-emerald-500/40 hover:bg-emerald-900/80 transition-all flex items-center gap-1 ml-2"
+            >
+              <BookOpen size={12} />
+              Swagger UI
+              <ExternalLink size={10} />
+            </a>
+          </div>
+
+        </div>
+      </div>
 
       {/* Modals */}
       {selectedJob && (
@@ -295,17 +356,16 @@ export default function App() {
       )}
 
       {/* Footer */}
-      <footer className="mt-auto border-t border-slate-800/80 bg-slate-950/60 backdrop-blur-md py-8 px-4 md:px-8 text-xs text-slate-400">
+      <footer className="mt-auto border-t border-slate-800/80 bg-slate-950/80 backdrop-blur-md py-8 px-4 md:px-8 text-xs text-slate-400 mb-12">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
           
           <div className="flex items-center gap-3">
-            <span className="font-bold text-white tracking-tight">Skill Match Job Portal</span>
+            <span className="font-extrabold text-white tracking-tight">Skill Match Job Portal</span>
             <span className="text-slate-600">•</span>
             <div className="flex items-center gap-2">
-              <span className="badge badge-neutral text-[10px]">React.js</span>
-              <span className="badge badge-neutral text-[10px]">Spring Boot 3.3</span>
-              <span className="badge badge-neutral text-[10px]">MongoDB Atlas</span>
-              <span className="badge badge-neutral text-[10px]">Swagger UI</span>
+              <span className="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-[10px] font-bold">Green Matches</span>
+              <span className="px-2 py-0.5 rounded bg-white/10 text-white border border-white/20 text-[10px] font-bold">White Precision</span>
+              <span className="px-2 py-0.5 rounded bg-red-500/20 text-red-300 border border-red-500/30 text-[10px] font-bold">Red Skill Gaps</span>
             </div>
           </div>
 
@@ -314,16 +374,16 @@ export default function App() {
               href="http://localhost:8080/swagger-ui.html"
               target="_blank" 
               rel="noopener noreferrer" 
-              className="text-indigo-400 hover:text-indigo-300 flex items-center gap-1 font-medium"
+              className="text-emerald-400 hover:text-emerald-300 flex items-center gap-1 font-bold"
             >
               <BookOpen size={13} />
-              <span>Swagger REST Documentation</span>
+              <span>Swagger REST API</span>
               <ExternalLink size={11} />
             </a>
 
             <button
               onClick={handleResetSeedData}
-              className="text-slate-400 hover:text-slate-200 flex items-center gap-1 transition-colors"
+              className="text-slate-400 hover:text-white flex items-center gap-1 transition-colors font-medium"
               title="Reset demonstration data"
             >
               <RotateCcw size={13} />

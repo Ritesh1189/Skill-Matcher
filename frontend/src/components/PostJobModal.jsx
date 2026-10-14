@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, Plus, Briefcase, Check } from 'lucide-react';
+import { X, Plus, Briefcase, Check, Info, Sparkles } from 'lucide-react';
 import { jobsApi } from '../services/api';
 
 const POPULAR_REQUIREMENTS = [
@@ -69,7 +69,7 @@ export default function PostJobModal({ recruiter, onClose, onJobCreated }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (formData.requiredSkills.length === 0) {
-      setError('At least one required skill must be added for match calculation');
+      setError('At least one required skill must be added for algorithmic match calculation');
       return;
     }
 
@@ -89,26 +89,28 @@ export default function PostJobModal({ recruiter, onClose, onJobCreated }) {
   return (
     <div className="modal-overlay" onClick={onClose}>
       <div 
-        className="modal-content relative p-6 sm:p-8 max-w-2xl"
+        className="modal-content relative p-6 sm:p-8 max-w-2xl border-2 border-white/20 bg-slate-900 shadow-2xl"
         onClick={(e) => e.stopPropagation()}
       >
         <button 
           onClick={onClose}
-          className="absolute top-5 right-5 p-2 rounded-lg bg-slate-800 text-slate-400 hover:text-white"
+          className="absolute top-5 right-5 p-2 rounded-xl bg-slate-800 text-white hover:bg-red-500 hover:text-white transition-all"
         >
           <X size={18} />
         </button>
 
         <div className="flex items-center gap-2 mb-1">
-          <Briefcase size={20} className="text-purple-400" />
-          <h2 className="text-xl font-bold text-white">Post a New Job Opportunity</h2>
+          <div className="w-8 h-8 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center border border-emerald-500/30">
+            <Briefcase size={18} />
+          </div>
+          <h2 className="text-xl sm:text-2xl font-black text-white">Post New Job Opening</h2>
         </div>
-        <p className="text-xs text-slate-400 mb-6">
-          Define role responsibilities and required skills. Our algorithm will score candidates against these requirements.
+        <p className="text-xs text-slate-300 mb-5">
+          Specify technical criteria. Candidate profiles will be scored against these requirements using deterministic skill overlap.
         </p>
 
         {error && (
-          <div className="p-3 mb-4 rounded-xl bg-rose-950/40 border border-rose-500/40 text-rose-300 text-xs">
+          <div className="p-3.5 mb-4 rounded-xl bg-red-950/60 border-2 border-red-500 text-red-200 text-xs font-bold">
             {error}
           </div>
         )}
@@ -117,7 +119,7 @@ export default function PostJobModal({ recruiter, onClose, onJobCreated }) {
           
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="form-label">Job Title</label>
+              <label className="form-label">Job Title *</label>
               <input
                 type="text"
                 className="form-control"
@@ -128,7 +130,7 @@ export default function PostJobModal({ recruiter, onClose, onJobCreated }) {
               />
             </div>
             <div>
-              <label className="form-label">Company Name</label>
+              <label className="form-label">Company Name *</label>
               <input
                 type="text"
                 className="form-control"
@@ -145,80 +147,84 @@ export default function PostJobModal({ recruiter, onClose, onJobCreated }) {
               <input
                 type="text"
                 className="form-control"
-                placeholder="e.g. Remote or Austin, TX"
                 value={formData.location}
                 onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-                required
+                placeholder="Remote or City"
               />
             </div>
-
             <div>
-              <label className="form-label">Employment Type</label>
+              <label className="form-label">Job Type</label>
               <select
-                className="form-control cursor-pointer"
+                className="form-control"
                 value={formData.type}
                 onChange={(e) => setFormData({ ...formData, type: e.target.value })}
               >
                 <option value="Full-time">Full-time</option>
-                <option value="Part-time">Part-time</option>
                 <option value="Contract">Contract</option>
-                <option value="Remote">Remote</option>
+                <option value="Part-time">Part-time</option>
                 <option value="Internship">Internship</option>
               </select>
             </div>
-
             <div>
-              <label className="form-label">Experience Level</label>
-              <select
-                className="form-control cursor-pointer"
-                value={formData.experienceLevel}
-                onChange={(e) => setFormData({ ...formData, experienceLevel: e.target.value })}
-              >
-                <option value="Entry Level">Entry Level</option>
-                <option value="Mid Level">Mid Level</option>
-                <option value="Senior">Senior</option>
-                <option value="Lead">Lead</option>
-              </select>
+              <label className="form-label">Salary Range</label>
+              <input
+                type="text"
+                className="form-control"
+                value={formData.salaryRange}
+                onChange={(e) => setFormData({ ...formData, salaryRange: e.target.value })}
+                placeholder="e.g. $100k - $130k"
+              />
             </div>
           </div>
 
           <div>
-            <label className="form-label">Compensation / Salary Range</label>
-            <input
-              type="text"
-              className="form-control"
-              placeholder="e.g. $100,000 - $130,000 / year"
-              value={formData.salaryRange}
-              onChange={(e) => setFormData({ ...formData, salaryRange: e.target.value })}
-            />
-          </div>
-
-          <div>
-            <label className="form-label">Job Description</label>
+            <label className="form-label">Detailed Job Description *</label>
             <textarea
               rows="4"
               className="form-control"
-              placeholder="Describe the role responsibilities, team impact, and engineering challenges..."
+              placeholder="Outline project responsibilities, team architecture, day-to-day duties..."
               value={formData.description}
               onChange={(e) => setFormData({ ...formData, description: e.target.value })}
               required
             />
           </div>
 
-          {/* Required Skills (Critical for Matching) */}
-          <div className="p-4 rounded-xl bg-slate-900 border border-indigo-500/30 space-y-3">
+          {/* REQUIRED SKILLS (Used directly for matching) */}
+          <div className="p-4 rounded-2xl bg-emerald-950/30 border-2 border-emerald-500/40 space-y-3">
             <div className="flex items-center justify-between">
-              <label className="form-label text-indigo-400 mb-0">
-                Required Skills for Overlap Matching ({formData.requiredSkills.length})
-              </label>
-              <span className="text-[11px] text-slate-500">Each skill counts towards 100% score</span>
+              <div>
+                <label className="form-label text-emerald-400 font-extrabold flex items-center gap-1.5">
+                  <Sparkles size={14} />
+                  <span>Mandatory Required Skills (Match Algorithm Criteria) *</span>
+                </label>
+                <p className="text-[11px] text-slate-300">
+                  Each skill forms the matching baseline: ({formData.requiredSkills.length} total required)
+                </p>
+              </div>
             </div>
 
+            {/* Current Required Skills */}
+            <div className="flex flex-wrap gap-1.5 min-h-[36px]">
+              {formData.requiredSkills.map((skill, index) => (
+                <span key={index} className="skill-chip matched text-xs font-bold">
+                  {skill}
+                  <button
+                    type="button"
+                    onClick={() => removeRequiredSkill(skill)}
+                    className="hover:text-red-400 p-0.5 rounded-full"
+                  >
+                    <X size={12} />
+                  </button>
+                </span>
+              ))}
+            </div>
+
+            {/* Add Custom Required Skill Input */}
             <div className="flex gap-2">
               <input
                 type="text"
                 className="form-control"
-                placeholder="Add required skill (e.g. Java, React, SQL, Git)"
+                placeholder="Add custom required skill (e.g. Redis, Kafka, GraphQL)..."
                 value={newRequiredSkill}
                 onChange={(e) => setNewRequiredSkill(e.target.value)}
                 onKeyDown={(e) => {
@@ -231,56 +237,50 @@ export default function PostJobModal({ recruiter, onClose, onJobCreated }) {
               <button
                 type="button"
                 onClick={() => addRequiredSkill(newRequiredSkill)}
-                className="btn btn-primary btn-sm shrink-0"
+                className="btn btn-green text-xs font-bold shrink-0"
               >
-                <Plus size={14} /> Add
+                <Plus size={14} />
+                Add
               </button>
             </div>
 
-            <div className="flex flex-wrap gap-1.5 min-h-[36px] p-2 rounded-lg bg-slate-950/60 border border-slate-800">
-              {formData.requiredSkills.map((skill, idx) => (
-                <span key={idx} className="skill-chip matched text-xs">
-                  <span>{skill}</span>
-                  <button
-                    type="button"
-                    onClick={() => removeRequiredSkill(skill)}
-                    className="hover:text-rose-400 text-slate-400 ml-1"
-                  >
-                    ×
-                  </button>
-                </span>
-              ))}
-            </div>
-
+            {/* Quick Suggestions */}
             <div>
-              <span className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider block mb-1">
-                Suggested Requirements:
-              </span>
+              <span className="text-[11px] text-slate-300 font-semibold block mb-1">Click to toggle requirements:</span>
               <div className="flex flex-wrap gap-1">
-                {POPULAR_REQUIREMENTS.filter(s => !formData.requiredSkills.includes(s)).slice(0, 8).map((skill, i) => (
-                  <button
-                    key={i}
-                    type="button"
-                    onClick={() => addRequiredSkill(skill)}
-                    className="text-[11px] px-2 py-0.5 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700/60 transition-colors flex items-center gap-1"
-                  >
-                    <Plus size={10} /> {skill}
-                  </button>
-                ))}
+                {POPULAR_REQUIREMENTS.map((s, idx) => {
+                  const has = formData.requiredSkills.some(rs => rs.toLowerCase() === s.toLowerCase());
+                  return (
+                    <button
+                      key={idx}
+                      type="button"
+                      onClick={() => has ? removeRequiredSkill(s) : addRequiredSkill(s)}
+                      className={`px-2.5 py-0.5 rounded-full text-[11px] font-bold transition-all border ${
+                        has 
+                          ? 'bg-emerald-500 text-white border-emerald-400' 
+                          : 'bg-white/10 text-slate-300 border-white/15 hover:bg-white/20 hover:text-white'
+                      }`}
+                    >
+                      {has ? '✓ ' : '+ '}{s}
+                    </button>
+                  );
+                })}
               </div>
             </div>
           </div>
 
-          <div className="pt-4 border-t border-slate-800 flex justify-end gap-3">
-            <button type="button" onClick={onClose} className="btn btn-secondary">
+          <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-800">
+            <button type="button" onClick={onClose} className="btn btn-secondary font-bold">
               Cancel
             </button>
-            <button type="submit" disabled={submitting} className="btn btn-primary">
-              <Plus size={15} />
-              <span>{submitting ? 'Publishing...' : 'Publish Job Listing'}</span>
+            <button type="submit" disabled={submitting} className="btn btn-green font-black sm:btn-lg">
+              <Plus size={16} />
+              <span>{submitting ? 'Publishing Job...' : 'Publish Job Listing'}</span>
             </button>
           </div>
+
         </form>
+
       </div>
     </div>
   );

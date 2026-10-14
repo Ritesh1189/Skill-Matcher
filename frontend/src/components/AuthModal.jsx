@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, User, Lock, Mail, Briefcase, Plus, Sparkles } from 'lucide-react';
+import { X, User, Lock, Mail, Briefcase, Plus, Sparkles, CheckCircle2 } from 'lucide-react';
 import { authApi } from '../services/api';
 
 export default function AuthModal({ onClose, onAuthSuccess }) {
@@ -66,7 +66,7 @@ export default function AuthModal({ onClose, onAuthSuccess }) {
         onClose();
       }
     } catch (err) {
-      setError(err.message || 'Authentication failed. Please check credentials.');
+      setError(err.message || 'Authentication failed. Please verify email and password.');
     } finally {
       setLoading(false);
     }
@@ -75,23 +75,23 @@ export default function AuthModal({ onClose, onAuthSuccess }) {
   return (
     <div className="modal-overlay" onClick={onClose}>
       <div 
-        className="modal-content relative p-6 sm:p-8 max-w-md"
+        className="modal-content relative p-6 sm:p-8 max-w-md border-2 border-white/20 bg-slate-900 shadow-2xl"
         onClick={(e) => e.stopPropagation()}
       >
         <button 
           onClick={onClose}
-          className="absolute top-5 right-5 p-2 rounded-lg bg-slate-800 text-slate-400 hover:text-white"
+          className="absolute top-5 right-5 p-2 rounded-xl bg-slate-800 text-white hover:bg-red-500 hover:text-white transition-all"
         >
           <X size={18} />
         </button>
 
         {/* Tab Switcher */}
-        <div className="flex border-b border-slate-800 mb-6">
+        <div className="flex border-b border-white/10 mb-6">
           <button
             type="button"
             onClick={() => { setIsRegister(false); setError(''); }}
-            className={`flex-1 pb-3 text-sm font-bold border-b-2 transition-all ${
-              !isRegister ? 'border-indigo-500 text-white' : 'border-transparent text-slate-400 hover:text-slate-300'
+            className={`flex-1 pb-3 text-sm font-extrabold border-b-2 transition-all ${
+              !isRegister ? 'border-emerald-500 text-emerald-400' : 'border-transparent text-slate-400 hover:text-white'
             }`}
           >
             Sign In
@@ -99,8 +99,8 @@ export default function AuthModal({ onClose, onAuthSuccess }) {
           <button
             type="button"
             onClick={() => { setIsRegister(true); setError(''); }}
-            className={`flex-1 pb-3 text-sm font-bold border-b-2 transition-all ${
-              isRegister ? 'border-indigo-500 text-white' : 'border-transparent text-slate-400 hover:text-slate-300'
+            className={`flex-1 pb-3 text-sm font-extrabold border-b-2 transition-all ${
+              isRegister ? 'border-emerald-500 text-emerald-400' : 'border-transparent text-slate-400 hover:text-white'
             }`}
           >
             Create Account
@@ -108,7 +108,7 @@ export default function AuthModal({ onClose, onAuthSuccess }) {
         </div>
 
         {error && (
-          <div className="p-3 mb-4 rounded-xl bg-rose-950/40 border border-rose-500/40 text-rose-300 text-xs">
+          <div className="p-3.5 mb-4 rounded-xl bg-red-950/60 border-2 border-red-500 text-red-200 text-xs font-bold">
             {error}
           </div>
         )}
@@ -121,21 +121,21 @@ export default function AuthModal({ onClose, onAuthSuccess }) {
                 <button
                   type="button"
                   onClick={() => setFormData({ ...formData, role: 'CANDIDATE' })}
-                  className={`py-2 px-3 rounded-lg font-bold border text-center transition-all ${
+                  className={`py-2.5 px-3 rounded-xl font-black border text-center transition-all ${
                     formData.role === 'CANDIDATE' 
-                      ? 'bg-indigo-600/30 border-indigo-500 text-white' 
-                      : 'bg-slate-900 border-slate-800 text-slate-400'
+                      ? 'bg-emerald-500 text-white border-emerald-400 shadow-md shadow-emerald-500/30' 
+                      : 'bg-slate-950 border-white/10 text-slate-300 hover:text-white'
                   }`}
                 >
-                  Job Seeker / Candidate
+                  Job Seeker
                 </button>
                 <button
                   type="button"
                   onClick={() => setFormData({ ...formData, role: 'RECRUITER' })}
-                  className={`py-2 px-3 rounded-lg font-bold border text-center transition-all ${
+                  className={`py-2.5 px-3 rounded-xl font-black border text-center transition-all ${
                     formData.role === 'RECRUITER' 
-                      ? 'bg-purple-600/30 border-purple-500 text-white' 
-                      : 'bg-slate-900 border-slate-800 text-slate-400'
+                      ? 'bg-white text-slate-950 border-white shadow-md' 
+                      : 'bg-slate-950 border-white/10 text-slate-300 hover:text-white'
                   }`}
                 >
                   Recruiter / Employer
@@ -146,11 +146,11 @@ export default function AuthModal({ onClose, onAuthSuccess }) {
 
           {isRegister && (
             <div>
-              <label className="form-label">Full Name</label>
+              <label className="form-label">Full Name *</label>
               <input
                 type="text"
                 className="form-control"
-                placeholder="e.g. Alex Morgan"
+                placeholder="e.g. Alex Chen"
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                 required
@@ -159,11 +159,11 @@ export default function AuthModal({ onClose, onAuthSuccess }) {
           )}
 
           <div>
-            <label className="form-label">Email Address</label>
+            <label className="form-label">Email Address *</label>
             <input
               type="email"
               className="form-control"
-              placeholder="you@example.com"
+              placeholder="you@domain.com"
               value={formData.email}
               onChange={(e) => setFormData({ ...formData, email: e.target.value })}
               required
@@ -171,7 +171,7 @@ export default function AuthModal({ onClose, onAuthSuccess }) {
           </div>
 
           <div>
-            <label className="form-label">Password</label>
+            <label className="form-label">Password *</label>
             <input
               type="password"
               className="form-control"
@@ -184,11 +184,11 @@ export default function AuthModal({ onClose, onAuthSuccess }) {
 
           {isRegister && formData.role === 'RECRUITER' && (
             <div>
-              <label className="form-label">Company Name</label>
+              <label className="form-label">Company Name *</label>
               <input
                 type="text"
                 className="form-control"
-                placeholder="e.g. CloudScale Innovations"
+                placeholder="e.g. Acme Tech Innovations"
                 value={formData.company}
                 onChange={(e) => setFormData({ ...formData, company: e.target.value })}
                 required
@@ -198,7 +198,10 @@ export default function AuthModal({ onClose, onAuthSuccess }) {
 
           {isRegister && formData.role === 'CANDIDATE' && (
             <div className="space-y-2 pt-1">
-              <label className="form-label">Primary Skills (for matching)</label>
+              <label className="form-label text-emerald-400 font-extrabold flex items-center gap-1">
+                <Sparkles size={13} />
+                <span>Primary Skills (for instant matching)</span>
+              </label>
               <div className="flex gap-2">
                 <input
                   type="text"
@@ -216,20 +219,20 @@ export default function AuthModal({ onClose, onAuthSuccess }) {
                 <button
                   type="button"
                   onClick={handleAddSkill}
-                  className="btn btn-sm btn-secondary"
+                  className="btn btn-green text-xs font-bold shrink-0"
                 >
                   <Plus size={14} /> Add
                 </button>
               </div>
 
-              <div className="flex flex-wrap gap-1 p-2 rounded-lg bg-slate-950/60 border border-slate-800">
+              <div className="flex flex-wrap gap-1 p-2.5 rounded-xl bg-slate-950/80 border border-emerald-500/30">
                 {formData.skills.map((skill, idx) => (
-                  <span key={idx} className="skill-chip matched text-xs">
+                  <span key={idx} className="skill-chip matched text-xs font-bold">
                     {skill}
                     <button
                       type="button"
                       onClick={() => handleRemoveSkill(skill)}
-                      className="ml-1 text-slate-400 hover:text-rose-400"
+                      className="ml-1 text-slate-400 hover:text-red-400"
                     >
                       ×
                     </button>
@@ -243,17 +246,17 @@ export default function AuthModal({ onClose, onAuthSuccess }) {
             <button
               type="submit"
               disabled={loading}
-              className="btn btn-primary w-full py-2.5 font-bold"
+              className="btn btn-green w-full py-3 font-black text-sm shadow-lg shadow-emerald-500/30"
             >
-              {loading ? 'Please wait...' : isRegister ? 'Register & Enter Portal' : 'Sign In to Portal'}
+              {loading ? 'Authenticating...' : isRegister ? 'Register & Enter Portal' : 'Sign In to Portal'}
             </button>
           </div>
 
-          <div className="text-center text-xs text-slate-500 pt-2">
+          <div className="text-center text-xs text-slate-400 pt-2 font-medium">
             {isRegister ? (
-              <span>Already have an account? Switch to Sign In above.</span>
+              <span>Already registered? Click Sign In above.</span>
             ) : (
-              <span>Tip: You can also use the Quick Switch dropdown in the navbar.</span>
+              <span>Quick switch between demo Candidate and Recruiter profiles in top right.</span>
             )}
           </div>
         </form>
