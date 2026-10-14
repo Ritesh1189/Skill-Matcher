@@ -10,8 +10,7 @@ import {
   Sparkles, 
   CheckCircle2, 
   Users,
-  Star,
-  DollarSign
+  Star
 } from 'lucide-react';
 
 export default function JobCard({ 
@@ -71,7 +70,7 @@ export default function JobCard({
             </span>
             {job.salaryRange && (
               <span className="naukri-meta-item naukri-salary-text">
-                <DollarSign size={14} />
+                <span style={{ fontWeight: 800, color: '#16a34a', fontSize: '0.9rem' }}>₹</span>
                 {job.salaryRange}
               </span>
             )}

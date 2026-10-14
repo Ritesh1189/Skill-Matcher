@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: skillmatch-portal
+    runtime: docker
+    dockerfilePath: Dockerfile
+    plan: free
+    region: oregon
+    envVars:
+      - key: PORT
+        value: 8080
+      - key: MONGODB_URI
+        sync: false
+    healthCheckPath: /api/health

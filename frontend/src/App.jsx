@@ -17,14 +17,30 @@ import {
 import { 
   CheckCircle2, 
   AlertCircle, 
-  RotateCcw, 
-  BookOpen, 
-  ExternalLink
+  RotateCcw
 } from 'lucide-react';
 
 export default function App() {
-  const [currentUser, setCurrentUser] = useState(null);
-  const [activeTab, setActiveTab] = useState('jobs'); // 'jobs' | 'matcher' | 'applications' | 'recruiter' | 'auth'
+  const [currentUser, setCurrentUser] = useState(() => {
+    try {
+      const stored = localStorage.getItem('skillmatch_user');
+      return stored ? JSON.parse(stored) : null;
+    } catch (e) {
+      return null;
+    }
+  });
+
+  const [activeTab, setActiveTab] = useState(() => {
+    try {
+      const stored = localStorage.getItem('skillmatch_user');
+      if (stored) {
+        const u = JSON.parse(stored);
+        return u.role === 'RECRUITER' ? 'recruiter' : 'jobs';
+      }
+    } catch (e) {}
+    return 'jobs';
+  });
+
   const [jobs, setJobs] = useState([]);
   const [matchesByJobId, setMatchesByJobId] = useState({});
   const [candidateApplications, setCandidateApplications] = useState([]);
@@ -52,11 +68,9 @@ export default function App() {
 
   const initApp = async () => {
     try {
-      // 1. Fetch Health
       const health = await systemApi.getHealth();
       setSystemHealth(health);
 
-      // 2. Fetch Jobs
       const jobsList = await jobsApi.getJobs();
       setJobs(jobsList || []);
     } catch (err) {
@@ -85,7 +99,6 @@ export default function App() {
   const handleApply = async (job, coverNote) => {
     if (!currentUser) {
       showToast('Please log in or register to apply for jobs and check your skill match.', true);
-      setActiveTab('auth');
       return;
     }
 
@@ -122,6 +135,9 @@ export default function App() {
 
   const handleProfileUpdated = (updatedUser) => {
     setCurrentUser(updatedUser);
+    try {
+      localStorage.setItem('skillmatch_user', JSON.stringify(updatedUser));
+    } catch (e) {}
     showToast('Profile and skills updated successfully!');
     if (updatedUser?.id && updatedUser.role === 'CANDIDATE') {
       loadMatchesAndApplications(updatedUser.id);
@@ -129,18 +145,20 @@ export default function App() {
   };
 
   const handleLogout = () => {
+    try {
+      localStorage.removeItem('skillmatch_user');
+    } catch (e) {}
     setCurrentUser(null);
     setMatchesByJobId({});
     setCandidateApplications([]);
     showToast('You have been logged out.');
-    setActiveTab('jobs');
   };
 
   const handleResetJobs = async () => {
-    if (!window.confirm('Reset sample job openings?')) return;
+    if (!window.confirm('Reset sample Indian employer job openings?')) return;
     try {
       await systemApi.resetSeedData();
-      showToast('Job openings refreshed!');
+      showToast('Indian job openings refreshed!');
       await initApp();
     } catch (err) {
       showToast('Failed to reset jobs', true);
@@ -152,6 +170,78 @@ export default function App() {
     setTimeout(() => setToast(null), 4000);
   };
 
+  // GATEKEEPER: While visiting website don't show website directly; first signup or login page must be displayed
+  if (!currentUser) {
+    return (
+      <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', background: '#f8fafc' }}>
+        
+        {/* Toast Notification */}
+        {toast && (
+          <div style={{ position: 'fixed', bottom: '24px', right: '24px', zIndex: 100 }}>
+            <div style={{
+              background: '#ffffff',
+              border: `1px solid ${toast.isError ? '#fca5a5' : '#86efac'}`,
+              borderRadius: '8px',
+              padding: '12px 18px',
+              boxShadow: '0 10px 25px -5px rgba(0,0,0,0.1)',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              fontSize: '0.85rem',
+              fontWeight: 700,
+              color: toast.isError ? '#b91c1c' : '#15803d'
+            }}>
+              {toast.isError ? <AlertCircle size={18} /> : <CheckCircle2 size={18} />}
+              <span>{toast.message}</span>
+            </div>
+          </div>
+        )}
+
+        {/* Gatekeeper Top Header */}
+        <header className="naukri-navbar" style={{ position: 'static' }}>
+          <div className="naukri-nav-container" style={{ justifyContent: 'space-between' }}>
+            <div className="naukri-brand">
+              <div className="naukri-logo-icon">
+                <CheckCircle2 size={24} />
+              </div>
+              <div className="naukri-brand-text">
+                <h1>Skill<span>Match</span></h1>
+                <div className="naukri-brand-sub">India Job Portal</div>
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <span style={{ background: '#ecfdf5', color: '#16a34a', border: '1px solid #bbf7d0', padding: '4px 12px', borderRadius: '999px', fontSize: '0.78rem', fontWeight: 800 }}>
+                🇮🇳 Indian Tech Employers & ₹ INR Salaries
+              </span>
+            </div>
+          </div>
+        </header>
+
+        {/* Gatekeeper Main: Signup or Login first */}
+        <main style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px 12px' }}>
+          <AuthPage 
+            initialMode="login"
+            onAuthSuccess={(user) => {
+              setCurrentUser(user);
+              try {
+                localStorage.setItem('skillmatch_user', JSON.stringify(user));
+              } catch (e) {}
+              showToast(`Welcome, ${user.name}!`);
+              setActiveTab(user.role === 'RECRUITER' ? 'recruiter' : 'jobs');
+            }}
+          />
+        </main>
+
+        {/* Gatekeeper Footer */}
+        <footer style={{ background: '#ffffff', borderTop: '1px solid #e2e8f0', padding: '16px 20px', textAlign: 'center', fontSize: '0.8rem', color: '#64748b' }}>
+          SkillMatch India • Connecting tech professionals with Indian employers across Bengaluru, Hyderabad, Pune, Gurugram, Mumbai & Chennai
+        </footer>
+      </div>
+    );
+  }
+
+  // Once Authenticated: Render Full Portal
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', background: '#f8fafc' }}>
       
@@ -189,21 +279,6 @@ export default function App() {
 
       {/* Main Content Area */}
       <main style={{ flex: 1, paddingBottom: '40px' }}>
-        {activeTab === 'auth' && (
-          <AuthPage 
-            onAuthSuccess={(user) => {
-              setCurrentUser(user);
-              showToast(`Welcome back, ${user.name}!`);
-              if (user.role === 'RECRUITER') {
-                setActiveTab('recruiter');
-              } else {
-                setActiveTab('jobs');
-              }
-            }}
-            onNavigateToJobs={() => setActiveTab('jobs')}
-          />
-        )}
-
         {activeTab === 'jobs' && (
           <BrowseJobs 
             jobs={jobs}
@@ -214,7 +289,7 @@ export default function App() {
             candidateApplications={candidateApplications}
             onOpenProfile={() => setIsProfileModalOpen(true)}
             onOpenPostJob={() => setIsPostJobModalOpen(true)}
-            onNavigateToAuth={() => setActiveTab('auth')}
+            onNavigateToAuth={() => {}}
           />
         )}
 
@@ -249,10 +324,7 @@ export default function App() {
           onApply={handleApply}
           hasApplied={candidateApplications.some(a => a.jobId === selectedJob.id)}
           isCandidate={currentUser?.role === 'CANDIDATE'}
-          onNavigateToAuth={() => {
-            setSelectedJob(null);
-            setActiveTab('auth');
-          }}
+          onNavigateToAuth={() => {}}
         />
       )}
 
@@ -276,7 +348,7 @@ export default function App() {
       <footer style={{ background: '#ffffff', borderTop: '1px solid #e2e8f0', padding: '24px 20px', fontSize: '0.85rem', color: '#64748b' }}>
         <div style={{ maxWidth: '1280px', margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <span style={{ fontWeight: 800, color: '#0f172a' }}>SkillMatch Portal</span>
+            <span style={{ fontWeight: 800, color: '#0f172a' }}>SkillMatch India</span>
             <span>•</span>
             <span>Intelligent Skill-Based Hiring Platform</span>
           </div>
@@ -289,16 +361,6 @@ export default function App() {
               <RotateCcw size={13} />
               Reset Sample Jobs
             </button>
-            <a 
-              href="http://localhost:8080/swagger-ui.html"
-              target="_blank"
-              rel="noopener noreferrer"
-              style={{ color: '#16a34a', fontWeight: 600, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '4px' }}
-            >
-              <BookOpen size={14} />
-              API Documentation
-              <ExternalLink size={12} />
-            </a>
           </div>
         </div>
       </footer>

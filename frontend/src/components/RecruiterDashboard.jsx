@@ -8,7 +8,6 @@ import {
   XCircle,
   Clock, 
   MapPin, 
-  DollarSign, 
   Filter, 
   ChevronRight,
   ExternalLink,

@@ -11,8 +11,7 @@ import {
   Tag,
   Sliders,
   Filter,
-  CheckCircle2,
-  DollarSign
+  CheckCircle2
 } from 'lucide-react';
 import JobCard from './JobCard';
 
@@ -124,7 +123,7 @@ export default function BrowseJobs({
               <input
                 type="text"
                 className="naukri-search-input"
-                placeholder="Location (e.g. Remote, San Francisco)"
+                placeholder="Location (e.g. Bengaluru, Hyderabad, Pune, Gurugram)"
                 value={location}
                 onChange={(e) => setLocation(e.target.value)}
               />

@@ -10,9 +10,7 @@ import {
   Building2,
   LogIn,
   LogOut,
-  UserPlus,
-  BookOpen,
-  ExternalLink
+  UserPlus
 } from 'lucide-react';
 
 export default function Navbar({ 
@@ -84,18 +82,6 @@ export default function Navbar({
               <span>Recruiter Dashboard</span>
             </button>
           )}
-
-          <a 
-            href="http://localhost:8080/swagger-ui.html"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="naukri-nav-item"
-            title="Swagger API Documentation"
-          >
-            <BookOpen size={16} />
-            <span>API Docs</span>
-            <ExternalLink size={12} />
-          </a>
         </nav>
 
         {/* Right Action & Profile Area */}

@@ -27,7 +27,7 @@ public class User {
 
     private String bio;
 
-    private String location; // e.g. "San Francisco, CA" or "Remote"
+    private String location; // e.g. "Bengaluru, Karnataka"
 
     private List<String> skills = new ArrayList<>();
 

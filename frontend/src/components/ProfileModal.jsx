@@ -137,7 +137,7 @@ export default function ProfileModal({ user, onClose, onProfileUpdated }) {
                 className="form-control"
                 value={formData.location}
                 onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-                placeholder="e.g. San Francisco or Remote"
+                placeholder="e.g. Bengaluru, Hyderabad, Pune, Gurugram"
               />
             </div>
             <div>

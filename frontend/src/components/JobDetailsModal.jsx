@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { 
   X, 
   MapPin, 
-  DollarSign, 
   Briefcase, 
   Clock, 
   Sparkles, 
@@ -110,7 +109,7 @@ export default function JobDetailsModal({
             </span>
             {job.salaryRange && (
               <span style={{ display: 'flex', alignItems: 'center', gap: '4px', color: '#16a34a', fontWeight: 700 }}>
-                <DollarSign size={15} />
+                <span style={{ fontWeight: 800, fontSize: '0.95rem' }}>₹</span>
                 {job.salaryRange}
               </span>
             )}

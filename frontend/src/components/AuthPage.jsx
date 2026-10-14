@@ -9,8 +9,7 @@ import {
   AlertCircle, 
   Eye, 
   EyeOff, 
-  Sparkles,
-  ArrowRight
+  MapPin
 } from 'lucide-react';
 import { authApi } from '../services/api';
 
@@ -19,7 +18,19 @@ const POPULAR_SKILLS = [
   'AWS', 'TypeScript', 'Node.js', 'Python', 'REST APIs'
 ];
 
-export default function AuthPage({ initialMode = 'login', onAuthSuccess, onNavigateToJobs }) {
+const INDIAN_LOCATIONS = [
+  'Bengaluru, Karnataka',
+  'Hyderabad, Telangana',
+  'Pune, Maharashtra',
+  'Gurugram, Delhi NCR',
+  'Navi Mumbai, Maharashtra',
+  'Chennai, Tamil Nadu',
+  'Noida, Uttar Pradesh',
+  'Mumbai, Maharashtra',
+  'Remote (India)'
+];
+
+export default function AuthPage({ initialMode = 'login', onAuthSuccess }) {
   const [mode, setMode] = useState(initialMode); // 'login' | 'signup'
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -34,9 +45,9 @@ export default function AuthPage({ initialMode = 'login', onAuthSuccess, onNavig
     role: 'CANDIDATE', // 'CANDIDATE' | 'RECRUITER'
     title: '',
     company: '',
-    location: 'Remote',
+    location: 'Bengaluru, Karnataka',
     experienceYears: 2,
-    skills: ['Java', 'React'],
+    skills: ['Java', 'React', 'Spring Boot', 'SQL'],
   });
 
   const [newSkillInput, setNewSkillInput] = useState('');
@@ -85,12 +96,12 @@ export default function AuthPage({ initialMode = 'login', onAuthSuccess, onNavig
           role: formData.role,
           title: formData.title || (formData.role === 'CANDIDATE' ? 'Software Developer' : 'Talent Partner'),
           company: formData.company,
-          location: formData.location || 'Remote',
+          location: formData.location || 'Bengaluru, Karnataka',
           skills: formData.role === 'CANDIDATE' ? formData.skills : [],
           experienceYears: formData.experienceYears || 0
         });
 
-        setSuccessMsg('Account created successfully!');
+        setSuccessMsg('Account created successfully! Redirecting...');
       } else {
         if (!formData.email.trim() || !formData.password) {
           throw new Error('Please enter both your email and password');
@@ -107,17 +118,17 @@ export default function AuthPage({ initialMode = 'login', onAuthSuccess, onNavig
       if (res?.user) {
         setTimeout(() => {
           onAuthSuccess(res.user);
-        }, 500);
+        }, 400);
       }
     } catch (err) {
-      setError(err.message || 'Authentication failed. Please check your credentials.');
+      setError(err.message || 'Authentication failed. Please verify your credentials.');
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div style={{ maxWidth: '560px', margin: '40px auto 60px', padding: '0 20px' }}>
+    <div style={{ maxWidth: '580px', width: '100%', margin: '20px auto 40px', padding: '0 16px' }}>
       
       {/* Centered Clean Card */}
       <div 
@@ -130,11 +141,11 @@ export default function AuthPage({ initialMode = 'login', onAuthSuccess, onNavig
         }}
       >
         {/* Brand Header */}
-        <div style={{ textAlign: 'center', marginBottom: '28px' }}>
+        <div style={{ textAlign: 'center', marginBottom: '24px' }}>
           <div 
             style={{
-              width: '44px',
-              height: '44px',
+              width: '48px',
+              height: '48px',
               borderRadius: '12px',
               background: '#16a34a',
               color: '#ffffff',
@@ -142,23 +153,23 @@ export default function AuthPage({ initialMode = 'login', onAuthSuccess, onNavig
               alignItems: 'center',
               justifyContent: 'center',
               marginBottom: '12px',
-              boxShadow: '0 4px 12px rgba(22, 163, 74, 0.25)'
+              boxShadow: '0 4px 14px rgba(22, 163, 74, 0.28)'
             }}
           >
-            <CheckCircle2 size={26} />
+            <CheckCircle2 size={28} />
           </div>
 
-          <h2 style={{ fontSize: '1.6rem', fontWeight: 900, color: '#0f172a', letterSpacing: '-0.02em', marginBottom: '4px' }}>
-            {mode === 'login' ? 'Welcome Back' : 'Create an Account'}
+          <h2 style={{ fontSize: '1.65rem', fontWeight: 900, color: '#0f172a', letterSpacing: '-0.02em', marginBottom: '4px' }}>
+            {mode === 'login' ? 'Sign In to SkillMatch' : 'Create Free Account'}
           </h2>
           <p style={{ fontSize: '0.875rem', color: '#64748b' }}>
             {mode === 'login' 
-              ? 'Log in to view job skill match scores and apply' 
-              : 'Join SkillMatch to connect your verified skills with jobs'}
+              ? 'Access Indian employer vacancies and verified skill matching' 
+              : 'Join to match your tech skills with top employers in India'}
           </p>
         </div>
 
-        {/* Tab Switcher */}
+        {/* Tab Switcher: Sign In vs Register */}
         <div 
           style={{ 
             display: 'grid', 
@@ -300,7 +311,7 @@ export default function AuthPage({ initialMode = 'login', onAuthSuccess, onNavig
                   }}
                 >
                   <Building2 size={16} />
-                  <span>Employer</span>
+                  <span>Employer / Recruiter</span>
                 </button>
               </div>
             </div>
@@ -316,7 +327,7 @@ export default function AuthPage({ initialMode = 'login', onAuthSuccess, onNavig
                   type="text"
                   className="form-control"
                   style={{ paddingLeft: '38px' }}
-                  placeholder="Enter your full name"
+                  placeholder="e.g. Rohan Sharma"
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   required
@@ -375,6 +386,26 @@ export default function AuthPage({ initialMode = 'login', onAuthSuccess, onNavig
             </div>
           </div>
 
+          {/* Location in Sign Up (Indian Tech Cities) */}
+          {mode === 'signup' && (
+            <div style={{ marginBottom: '16px' }}>
+              <label className="form-label">Location (Indian Tech Hub) *</label>
+              <div style={{ position: 'relative' }}>
+                <MapPin size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
+                <select
+                  className="form-control"
+                  style={{ paddingLeft: '38px' }}
+                  value={formData.location}
+                  onChange={(e) => setFormData({ ...formData, location: e.target.value })}
+                >
+                  {INDIAN_LOCATIONS.map((loc, idx) => (
+                    <option key={idx} value={loc}>{loc}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+          )}
+
           {/* Candidate-specific fields in Sign Up */}
           {mode === 'signup' && formData.role === 'CANDIDATE' && (
             <>
@@ -384,7 +415,7 @@ export default function AuthPage({ initialMode = 'login', onAuthSuccess, onNavig
                   <input
                     type="text"
                     className="form-control"
-                    placeholder="e.g. Java Engineer"
+                    placeholder="e.g. Java Full-Stack Engineer"
                     value={formData.title}
                     onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                   />
@@ -484,7 +515,7 @@ export default function AuthPage({ initialMode = 'login', onAuthSuccess, onNavig
                   type="text"
                   className="form-control"
                   style={{ paddingLeft: '38px' }}
-                  placeholder="e.g. CloudScale Innovations"
+                  placeholder="e.g. Tata Consultancy Services, Infosys, Swiggy"
                   value={formData.company}
                   onChange={(e) => setFormData({ ...formData, company: e.target.value })}
                   required
@@ -494,14 +525,14 @@ export default function AuthPage({ initialMode = 'login', onAuthSuccess, onNavig
           )}
 
           {/* Submit Button */}
-          <div style={{ marginTop: '12px' }}>
+          <div style={{ marginTop: '16px' }}>
             <button
               type="submit"
               disabled={loading}
               className="btn btn-green btn-lg"
               style={{ width: '100%', padding: '14px', fontSize: '1rem', fontWeight: 800, justifyContent: 'center' }}
             >
-              {loading ? 'Please wait...' : mode === 'login' ? 'Sign In' : 'Create Free Account'}
+              {loading ? 'Please wait...' : mode === 'login' ? 'Sign In to Portal' : 'Create Free Account'}
             </button>
           </div>
 
@@ -515,7 +546,7 @@ export default function AuthPage({ initialMode = 'login', onAuthSuccess, onNavig
                   onClick={() => { setMode('signup'); setError(''); }}
                   style={{ background: 'none', border: 'none', color: '#16a34a', fontWeight: 800, cursor: 'pointer', textDecoration: 'underline' }}
                 >
-                  Register here
+                  Register Free
                 </button>
               </span>
             ) : (

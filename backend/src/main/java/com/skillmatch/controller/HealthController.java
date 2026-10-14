@@ -28,9 +28,9 @@ public class HealthController {
     private final DataInitializationService dataInitializationService;
 
     public HealthController(MongoTemplate mongoTemplate,
-                            UserService userService,
-                            JobService jobService,
-                            DataInitializationService dataInitializationService) {
+            UserService userService,
+            JobService jobService,
+            DataInitializationService dataInitializationService) {
         this.mongoTemplate = mongoTemplate;
         this.userService = userService;
         this.jobService = jobService;
@@ -88,8 +88,7 @@ public class HealthController {
                 "Synonym normalization (e.g. React.js -> react, SpringBoot -> spring boot)",
                 "Detailed matched vs missing breakdown",
                 "Bonus skill discovery",
-                "Match tiers: Strong (>=80%), Moderate (50-79%), Low (<50%)"
-        ));
+                "Match tiers: Strong (>=80%), Moderate (50-79%), Low (<50%)"));
         return ResponseEntity.ok(ApiResponse.ok(meta));
     }
 }

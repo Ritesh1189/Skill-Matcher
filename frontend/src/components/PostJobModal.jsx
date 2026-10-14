@@ -10,11 +10,11 @@ const POPULAR_REQUIREMENTS = [
 export default function PostJobModal({ recruiter, onClose, onJobCreated }) {
   const [formData, setFormData] = useState({
     title: '',
-    company: recruiter?.company || 'Acme Technologies',
-    location: 'Remote',
+    company: recruiter?.company || 'Tata Consultancy Services',
+    location: 'Bengaluru, Karnataka (Hybrid)',
     type: 'Full-time',
     experienceLevel: 'Mid Level',
-    salaryRange: '$90,000 - $120,000 / yr',
+    salaryRange: '₹12.0 - ₹18.0 LPA',
     description: '',
     requiredSkills: ['Java', 'React', 'SQL', 'Git'],
     niceToHaveSkills: ['Spring Boot', 'Docker'],
@@ -144,7 +144,7 @@ export default function PostJobModal({ recruiter, onClose, onJobCreated }) {
                 className="form-control"
                 value={formData.location}
                 onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-                placeholder="Remote or City"
+                placeholder="e.g. Bengaluru, Hyderabad, Pune"
               />
             </div>
             <div>
@@ -167,7 +167,7 @@ export default function PostJobModal({ recruiter, onClose, onJobCreated }) {
                 className="form-control"
                 value={formData.salaryRange}
                 onChange={(e) => setFormData({ ...formData, salaryRange: e.target.value })}
-                placeholder="e.g. $100k - $130k"
+                placeholder="e.g. ₹12.0 - ₹18.0 LPA"
               />
             </div>
           </div>
