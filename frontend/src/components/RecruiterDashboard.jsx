@@ -14,13 +14,9 @@ import {
   ExternalLink,
   Sparkles,
   Award,
-  Send,
-  UserCheck,
-  Building2,
-  Calendar
+  Building2
 } from 'lucide-react';
 import { jobsApi, applicationsApi } from '../services/api';
-import MatchScoreBadge from './MatchScoreBadge';
 
 export default function RecruiterDashboard({ recruiter, onOpenPostJob }) {
   const [jobs, setJobs] = useState([]);
@@ -68,8 +64,8 @@ export default function RecruiterDashboard({ recruiter, onOpenPostJob }) {
     try {
       await applicationsApi.updateStatus(appId, newStatus);
       setApplications(prev => prev.map(a => a.id === appId ? { ...a, status: newStatus } : a));
-      setActionSuccess(`Candidate status updated to ${newStatus}`);
-      setTimeout(() => setActionSuccess(''), 3500);
+      setActionSuccess(`Applicant status changed to ${newStatus}`);
+      setTimeout(() => setActionSuccess(''), 3000);
     } catch (err) {
       console.error('Failed to update status:', err);
     }
@@ -84,8 +80,8 @@ export default function RecruiterDashboard({ recruiter, onOpenPostJob }) {
         setSelectedJob(null);
         setApplications([]);
       }
-      setActionSuccess('Job listing removed successfully');
-      setTimeout(() => setActionSuccess(''), 3500);
+      setActionSuccess('Job deleted successfully');
+      setTimeout(() => setActionSuccess(''), 3000);
     } catch (err) {
       console.error('Failed to delete job:', err);
     }
@@ -93,306 +89,290 @@ export default function RecruiterDashboard({ recruiter, onOpenPostJob }) {
 
   const totalApplicantsCount = jobs.reduce((sum, j) => sum + (j.applicantsCount || 0), 0);
   const shortlistedCount = applications.filter(a => ['SHORTLISTED', 'INTERVIEW', 'HIRED'].includes(a.status)).length;
-  const highMatchCount = applications.filter(a => a.matchScore >= 70).length;
 
   return (
-    <div className="max-w-7xl mx-auto space-y-6">
+    <div className="naukri-container">
       
-      {/* Header & Metrics */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-slate-800">
+      {/* Header (Naukri Employer style) */}
+      <div style={{ background: '#ffffff', borderRadius: '12px', border: '1px solid #e2e8f0', padding: '24px', marginBottom: '20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', boxShadow: 'var(--shadow-card)', flexWrap: 'wrap', gap: '16px' }}>
         <div>
-          <div className="flex items-center gap-2 mb-1">
-            <span className="text-xs font-black uppercase tracking-wider text-emerald-400 flex items-center gap-1.5">
-              <Briefcase size={14} />
-              Recruiter Talent Management
-            </span>
-            <span className="text-xs font-bold px-2.5 py-0.5 rounded-full bg-white/10 text-white border border-white/20">
-              {recruiter?.company || 'Enterprise Partner'}
-            </span>
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '0.75rem', fontWeight: 800, color: '#16a34a', textTransform: 'uppercase', marginBottom: '4px' }}>
+            <Building2 size={14} />
+            Employer Hiring Portal
           </div>
-          <h1 className="text-2xl sm:text-3xl font-black text-white">
-            Job Postings & Algorithmic Applicant Review
+          <h1 style={{ fontSize: '1.75rem', fontWeight: 800, color: '#0f172a' }}>
+            Candidate Applications & Role Postings
           </h1>
-          <p className="text-xs text-slate-300 mt-1">
-            Candidates are scored and ranked transparently by percentage of required skill overlap.
+          <p style={{ fontSize: '0.85rem', color: '#64748b' }}>
+            Manage job vacancies and evaluate candidates ranked by automated skill match percentages.
           </p>
         </div>
 
-        <button onClick={onOpenPostJob} className="btn btn-green font-extrabold sm:btn-lg shadow-lg shadow-emerald-500/20">
+        <button onClick={onOpenPostJob} className="btn btn-green btn-lg">
           <PlusCircle size={18} />
-          <span>Post New Job Position</span>
+          <span>Post a New Job</span>
         </button>
       </div>
 
       {actionSuccess && (
-        <div className="p-4 rounded-2xl bg-emerald-950/60 border-2 border-emerald-500 text-emerald-200 text-xs font-bold flex items-center gap-2 shadow-lg animate-fadeIn">
-          <CheckCircle2 size={18} className="text-emerald-400 shrink-0" />
+        <div style={{ padding: '12px 16px', borderRadius: '8px', background: '#ecfdf5', border: '1px solid #86efac', color: '#166534', fontSize: '0.85rem', fontWeight: 700, marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <CheckCircle2 size={18} />
           <span>{actionSuccess}</span>
         </div>
       )}
 
-      {/* Metrics Counters (Green, White, and Red Highlights) */}
-      <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
-        <div className="glass-panel p-5 rounded-2xl border border-white/20 bg-slate-900">
-          <div className="text-xs text-slate-400 font-bold uppercase tracking-wider">Active Postings</div>
-          <div className="text-3xl font-black text-white mt-1">{jobs.length}</div>
-          <div className="text-[11px] text-slate-400 mt-0.5">Open on board</div>
+      {/* Metrics Counters */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px', marginBottom: '20px' }}>
+        <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '10px', padding: '16px', boxShadow: 'var(--shadow-sm)' }}>
+          <div style={{ fontSize: '0.75rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase' }}>Active Job Postings</div>
+          <div style={{ fontSize: '1.75rem', fontWeight: 900, color: '#0f172a', marginTop: '4px' }}>{jobs.length}</div>
         </div>
 
-        <div className="glass-panel p-5 rounded-2xl border border-white/20 bg-slate-900">
-          <div className="text-xs text-slate-400 font-bold uppercase tracking-wider">Total Received</div>
-          <div className="text-3xl font-black text-white mt-1">{totalApplicantsCount}</div>
-          <div className="text-[11px] text-slate-400 mt-0.5">Applicant submissions</div>
+        <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '10px', padding: '16px', boxShadow: 'var(--shadow-sm)' }}>
+          <div style={{ fontSize: '0.75rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase' }}>Total Applications Received</div>
+          <div style={{ fontSize: '1.75rem', fontWeight: 900, color: '#0f172a', marginTop: '4px' }}>{totalApplicantsCount}</div>
         </div>
 
-        <div className="glass-panel p-5 rounded-2xl border-2 border-emerald-500/40 bg-emerald-950/30">
-          <div className="text-xs text-emerald-400 font-bold uppercase tracking-wider flex items-center gap-1">
-            <Sparkles size={12} />
-            High Match (≥ 70%)
-          </div>
-          <div className="text-3xl font-black text-emerald-400 mt-1">{highMatchCount}</div>
-          <div className="text-[11px] text-emerald-300 mt-0.5">Strong fit candidates</div>
-        </div>
-
-        <div className="glass-panel p-5 rounded-2xl border-2 border-white/30 bg-white/5">
-          <div className="text-xs text-white font-bold uppercase tracking-wider flex items-center gap-1">
-            <Award size={12} />
-            Shortlisted / Hired
-          </div>
-          <div className="text-3xl font-black text-white mt-1">{shortlistedCount}</div>
-          <div className="text-[11px] text-slate-300 mt-0.5">In advanced stages</div>
+        <div style={{ background: '#ffffff', border: '1px solid #86efac', borderRadius: '10px', padding: '16px', boxShadow: 'var(--shadow-sm)', background: '#ecfdf5' }}>
+          <div style={{ fontSize: '0.75rem', fontWeight: 700, color: '#166534', textTransform: 'uppercase' }}>Shortlisted / In Pipeline</div>
+          <div style={{ fontSize: '1.75rem', fontWeight: 900, color: '#15803d', marginTop: '4px' }}>{shortlistedCount}</div>
         </div>
       </div>
 
-      {/* Main Grid: Left Jobs List, Right Applicants Review */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+      {/* Two Column Layout: Left (Job Postings), Right (Applicants Review) */}
+      <div style={{ display: 'grid', gridTemplateColumns: '320px 1fr', gap: '20px', alignItems: 'start' }}>
         
-        {/* Left Column: Recruiter Job Listings */}
-        <div className="lg:col-span-5 space-y-3">
-          <div className="flex items-center justify-between text-xs font-bold text-slate-300 uppercase tracking-wider mb-1">
-            <span>Your Listed Openings</span>
-            <span className="text-emerald-400">{jobs.length} Active</span>
+        {/* Left Column: Job Postings */}
+        <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '10px', padding: '16px', boxShadow: 'var(--shadow-card)' }}>
+          <div style={{ fontSize: '0.85rem', fontWeight: 800, color: '#0f172a', textTransform: 'uppercase', marginBottom: '12px' }}>
+            Your Open Positions ({jobs.length})
           </div>
 
           {loading ? (
-            <div className="py-12 text-center text-slate-400 text-xs">Loading postings...</div>
+            <div style={{ padding: '24px', textAlign: 'center', color: '#64748b', fontSize: '0.85rem' }}>Loading postings...</div>
           ) : jobs.length === 0 ? (
-            <div className="glass-panel p-8 text-center rounded-3xl border border-white/15 bg-slate-900">
-              <Briefcase size={32} className="mx-auto text-emerald-400 mb-2" />
-              <div className="text-base font-bold text-white">No jobs posted yet</div>
-              <p className="text-xs text-slate-400 mt-1 mb-4">Post a role to start receiving matched candidates.</p>
-              <button onClick={onOpenPostJob} className="btn btn-green text-xs font-bold">
-                Post Job
+            <div style={{ textAlign: 'center', padding: '24px', color: '#64748b' }}>
+              <p style={{ fontSize: '0.85rem', marginBottom: '12px' }}>No jobs posted yet.</p>
+              <button onClick={onOpenPostJob} className="btn btn-green btn-sm">
+                Post First Job
               </button>
             </div>
           ) : (
-            jobs.map((job) => {
-              const isSelected = selectedJob?.id === job.id;
-              return (
-                <div
-                  key={job.id}
-                  onClick={() => selectJobToReview(job)}
-                  className={`glass-panel p-4 rounded-2xl cursor-pointer transition-all border ${
-                    isSelected 
-                      ? 'border-2 border-emerald-500 bg-slate-900 shadow-xl shadow-emerald-500/10' 
-                      : 'border-white/15 bg-slate-900/80 hover:border-white/30'
-                  }`}
-                >
-                  <div className="flex items-start justify-between gap-2">
-                    <div>
-                      <h3 className="text-sm font-extrabold text-white leading-tight">
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              {jobs.map((job) => {
+                const isSelected = selectedJob?.id === job.id;
+                return (
+                  <div
+                    key={job.id}
+                    onClick={() => selectJobToReview(job)}
+                    style={{
+                      padding: '12px',
+                      borderRadius: '8px',
+                      border: isSelected ? '2px solid #16a34a' : '1px solid #e2e8f0',
+                      background: isSelected ? '#ecfdf5' : '#ffffff',
+                      cursor: 'pointer',
+                      transition: 'all 0.15s'
+                    }}
+                  >
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                      <h3 style={{ fontSize: '0.9rem', fontWeight: 700, color: '#0f172a', lineHeight: 1.2 }}>
                         {job.title}
                       </h3>
-                      <div className="text-xs text-slate-300 mt-1 flex items-center gap-2">
-                        <span>{job.location}</span>
-                        <span>•</span>
-                        <span>{job.type}</span>
-                      </div>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDeleteJob(job.id);
+                        }}
+                        style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer', padding: '2px' }}
+                        title="Delete listing"
+                      >
+                        <Trash2 size={13} />
+                      </button>
                     </div>
-                    <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
-                      {job.applicantsCount || 0} applicants
-                    </span>
-                  </div>
 
-                  <div className="mt-3 flex items-center justify-between pt-2 border-t border-slate-800 text-xs">
-                    <span className="text-slate-400 font-medium">
-                      {job.requiredSkills?.length || 0} skills: {job.requiredSkills?.slice(0, 3).join(', ')}...
-                    </span>
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleDeleteJob(job.id);
-                      }}
-                      className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-red-500 transition-colors"
-                      title="Delete job listing"
-                    >
-                      <Trash2 size={13} />
-                    </button>
+                    <div style={{ fontSize: '0.75rem', color: '#64748b', marginTop: '4px' }}>
+                      {job.location} • {job.type}
+                    </div>
+
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '8px', paddingTop: '6px', borderTop: '1px solid #f1f5f9', fontSize: '0.7rem' }}>
+                      <span style={{ color: '#16a34a', fontWeight: 700 }}>
+                        {job.applicantsCount || 0} applicants
+                      </span>
+                      <span style={{ color: '#64748b' }}>
+                        {job.requiredSkills?.length || 0} skills
+                      </span>
+                    </div>
                   </div>
-                </div>
-              );
-            })
+                );
+              })}
+            </div>
           )}
         </div>
 
         {/* Right Column: Applicants for Selected Job */}
-        <div className="lg:col-span-7">
-          <div className="glass-panel p-6 sm:p-7 rounded-3xl border-2 border-white/20 bg-slate-900 shadow-2xl">
-            {selectedJob ? (
-              <>
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-5 mb-5 border-b border-slate-800">
-                  <div>
-                    <span className="text-[11px] font-black uppercase tracking-wider text-emerald-400">
-                      Reviewing Applicants
-                    </span>
-                    <h2 className="text-xl sm:text-2xl font-black text-white mt-0.5">
-                      {selectedJob.title}
-                    </h2>
-                    <div className="text-xs text-slate-300 mt-1 flex items-center gap-1 flex-wrap">
-                      <span className="font-bold text-white">Required Skills:</span>
-                      {selectedJob.requiredSkills.map((sk, idx) => (
-                        <span key={idx} className="px-2 py-0.5 rounded bg-white/10 text-white font-mono text-[11px]">
-                          {sk}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div className="text-xs font-black px-3.5 py-1.5 rounded-xl bg-white/10 text-white border border-white/20 self-start sm:self-auto">
-                    {applications.length} Candidates
+        <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '10px', padding: '20px', boxShadow: 'var(--shadow-card)' }}>
+          {selectedJob ? (
+            <>
+              <div style={{ paddingBottom: '16px', marginBottom: '16px', borderBottom: '1px solid #e2e8f0', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '8px' }}>
+                <div>
+                  <span style={{ fontSize: '0.75rem', fontWeight: 800, color: '#16a34a', textTransform: 'uppercase' }}>
+                    Applicants Review
+                  </span>
+                  <h2 style={{ fontSize: '1.25rem', fontWeight: 800, color: '#0f172a', marginTop: '2px' }}>
+                    {selectedJob.title}
+                  </h2>
+                  <div style={{ fontSize: '0.75rem', color: '#64748b', marginTop: '4px' }}>
+                    Required: {selectedJob.requiredSkills.join(', ')}
                   </div>
                 </div>
 
-                {loadingApps ? (
-                  <div className="py-16 text-center text-slate-400 text-xs">Evaluating applicants...</div>
-                ) : applications.length === 0 ? (
-                  <div className="py-16 text-center text-slate-400 text-xs">
-                    <Users size={36} className="mx-auto text-slate-500 mb-2" />
-                    <p className="font-bold text-white text-sm">No applications received yet for this role.</p>
-                    <p className="text-[11px] text-slate-400 mt-1">Candidates who apply will have their skills automatically compared and scored.</p>
-                  </div>
-                ) : (
-                  <div className="space-y-4">
-                    {applications.map((app) => (
-                      <div 
-                        key={app.id}
-                        className="p-5 rounded-2xl bg-slate-950/80 border border-white/15 hover:border-emerald-500/40 transition-all space-y-3"
-                      >
-                        <div className="flex items-start justify-between gap-3 flex-wrap">
-                          <div>
-                            <div className="text-base font-extrabold text-white flex items-center gap-2">
-                              <span>{app.candidateName}</span>
-                              <span className="text-xs text-slate-400 font-normal">({app.candidateEmail})</span>
-                            </div>
-                            <div className="text-xs text-emerald-400 font-semibold mt-0.5">
-                              {app.candidateTitle || 'Candidate Profile'}
-                            </div>
+                <span style={{ fontSize: '0.8rem', fontWeight: 700, padding: '4px 10px', borderRadius: '6px', background: '#f1f5f9', color: '#475569' }}>
+                  {applications.length} Candidates
+                </span>
+              </div>
+
+              {loadingApps ? (
+                <div style={{ padding: '40px', textAlign: 'center', color: '#64748b', fontSize: '0.85rem' }}>Loading applicants...</div>
+              ) : applications.length === 0 ? (
+                <div style={{ padding: '40px', textAlign: 'center', color: '#64748b' }}>
+                  <Users size={32} style={{ color: '#94a3b8', margin: '0 auto 8px' }} />
+                  <p style={{ fontWeight: 600, color: '#0f172a', fontSize: '0.9rem' }}>No applications received yet for this role.</p>
+                  <p style={{ fontSize: '0.75rem', color: '#64748b', marginTop: '2px' }}>Candidates matching the required skills will show up here.</p>
+                </div>
+              ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                  {applications.map((app) => (
+                    <div 
+                      key={app.id}
+                      style={{
+                        padding: '16px',
+                        borderRadius: '8px',
+                        border: '1px solid #e2e8f0',
+                        background: '#f8fafc',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: '10px'
+                      }}
+                    >
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '8px' }}>
+                        <div>
+                          <div style={{ fontSize: '0.95rem', fontWeight: 800, color: '#0f172a' }}>
+                            {app.candidateName}
+                            <span style={{ fontSize: '0.75rem', fontWeight: 400, color: '#64748b', marginLeft: '6px' }}>({app.candidateEmail})</span>
                           </div>
-
-                          <MatchScoreBadge 
-                            score={app.matchScore}
-                            size="md"
-                          />
+                          <div style={{ fontSize: '0.8rem', color: '#16a34a', fontWeight: 600 }}>
+                            {app.candidateTitle || 'Candidate Profile'}
+                          </div>
                         </div>
 
-                        {/* Matched in Green & Missing in Red */}
-                        <div className="text-xs space-y-2 pt-2 border-t border-slate-800">
-                          {app.matchedSkills && app.matchedSkills.length > 0 && (
-                            <div className="flex items-center gap-1.5 flex-wrap">
-                              <span className="text-[11px] font-black text-emerald-400 uppercase tracking-wider">
-                                Matched ({app.matchedSkills.length}):
-                              </span>
-                              {app.matchedSkills.map((s, idx) => (
-                                <span key={idx} className="skill-chip matched text-[11px] font-bold">
-                                  {s}
-                                </span>
-                              ))}
-                            </div>
-                          )}
-
-                          {app.missingSkills && app.missingSkills.length > 0 && (
-                            <div className="flex items-center gap-1.5 flex-wrap">
-                              <span className="text-[11px] font-black text-red-400 uppercase tracking-wider">
-                                Missing ({app.missingSkills.length}):
-                              </span>
-                              {app.missingSkills.map((s, idx) => (
-                                <span key={idx} className="skill-chip missing text-[11px] font-bold">
-                                  {s}
-                                </span>
-                              ))}
-                            </div>
-                          )}
+                        <div style={{ padding: '3px 10px', borderRadius: '9999px', background: '#ecfdf5', color: '#15803d', border: '1px solid #86efac', fontWeight: 800, fontSize: '0.8rem' }}>
+                          {app.matchScore}% Compatibility
                         </div>
+                      </div>
 
-                        {app.coverNote && (
-                          <div className="text-xs text-slate-300 bg-slate-900 p-3 rounded-xl border border-white/10 italic">
-                            "{app.coverNote}"
+                      {/* Skills match */}
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', fontSize: '0.75rem' }}>
+                        {app.matchedSkills && app.matchedSkills.length > 0 && (
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '4px', flexWrap: 'wrap' }}>
+                            <span style={{ fontWeight: 700, color: '#15803d' }}>Matched:</span>
+                            {app.matchedSkills.map((s, idx) => (
+                              <span key={idx} className="skill-chip matched" style={{ fontSize: '0.7rem' }}>
+                                {s}
+                              </span>
+                            ))}
                           </div>
                         )}
 
-                        {/* Interactive Recruiter Decision Bar */}
-                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-3 border-t border-slate-800">
-                          <span className="text-xs font-bold text-slate-300 uppercase tracking-wider">
-                            Pipeline Action:
-                          </span>
-                          <div className="flex items-center gap-1.5 flex-wrap">
-                            <button
-                              type="button"
-                              onClick={() => handleStatusChange(app.id, 'SHORTLISTED')}
-                              className={`px-3 py-1 rounded-lg text-xs font-extrabold transition-all border ${
-                                app.status === 'SHORTLISTED'
-                                  ? 'bg-emerald-500 text-white border-emerald-400 shadow-sm'
-                                  : 'bg-white/10 text-white border-white/20 hover:bg-emerald-600'
-                              }`}
-                            >
-                              ⭐ Shortlist
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => handleStatusChange(app.id, 'INTERVIEW')}
-                              className={`px-3 py-1 rounded-lg text-xs font-extrabold transition-all border ${
-                                app.status === 'INTERVIEW'
-                                  ? 'bg-emerald-500 text-white border-emerald-400 shadow-sm'
-                                  : 'bg-white/10 text-white border-white/20 hover:bg-emerald-600'
-                              }`}
-                            >
-                              📅 Interview
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => handleStatusChange(app.id, 'HIRED')}
-                              className={`px-3 py-1 rounded-lg text-xs font-extrabold transition-all border ${
-                                app.status === 'HIRED'
-                                  ? 'bg-emerald-500 text-white border-emerald-400 shadow-md shadow-emerald-500/40'
-                                  : 'bg-emerald-950/40 text-emerald-300 border-emerald-500/40 hover:bg-emerald-600 hover:text-white'
-                              }`}
-                            >
-                              🎉 Hire
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => handleStatusChange(app.id, 'REJECTED')}
-                              className={`px-3 py-1 rounded-lg text-xs font-extrabold transition-all border ${
-                                app.status === 'REJECTED'
-                                  ? 'bg-red-500 text-white border-red-400 shadow-md shadow-red-500/40'
-                                  : 'bg-red-950/40 text-red-300 border-red-500/40 hover:bg-red-600 hover:text-white'
-                              }`}
-                            >
-                              ❌ Decline
-                            </button>
+                        {app.missingSkills && app.missingSkills.length > 0 && (
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '4px', flexWrap: 'wrap' }}>
+                            <span style={{ fontWeight: 700, color: '#b91c1c' }}>Missing:</span>
+                            {app.missingSkills.map((s, idx) => (
+                              <span key={idx} className="skill-chip missing" style={{ fontSize: '0.7rem' }}>
+                                {s}
+                              </span>
+                            ))}
                           </div>
+                        )}
+                      </div>
+
+                      {app.coverNote && (
+                        <div style={{ fontSize: '0.75rem', color: '#475569', fontStyle: 'italic', background: '#ffffff', padding: '8px', borderRadius: '6px', border: '1px solid #e2e8f0' }}>
+                          "{app.coverNote}"
+                        </div>
+                      )}
+
+                      {/* 1-Click Pipeline Status Actions */}
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingTop: '8px', borderTop: '1px solid #e2e8f0', flexWrap: 'wrap', gap: '8px' }}>
+                        <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#64748b' }}>
+                          Update Pipeline Stage:
+                        </span>
+
+                        <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+                          <button
+                            type="button"
+                            onClick={() => handleStatusChange(app.id, 'SHORTLISTED')}
+                            className="btn btn-sm"
+                            style={{
+                              background: app.status === 'SHORTLISTED' ? '#16a34a' : '#ffffff',
+                              color: app.status === 'SHORTLISTED' ? '#ffffff' : '#15803d',
+                              border: '1px solid #86efac'
+                            }}
+                          >
+                            ⭐ Shortlist
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={() => handleStatusChange(app.id, 'INTERVIEW')}
+                            className="btn btn-sm"
+                            style={{
+                              background: app.status === 'INTERVIEW' ? '#16a34a' : '#ffffff',
+                              color: app.status === 'INTERVIEW' ? '#ffffff' : '#15803d',
+                              border: '1px solid #86efac'
+                            }}
+                          >
+                            📅 Interview
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={() => handleStatusChange(app.id, 'HIRED')}
+                            className="btn btn-sm"
+                            style={{
+                              background: app.status === 'HIRED' ? '#166534' : '#ecfdf5',
+                              color: app.status === 'HIRED' ? '#ffffff' : '#166534',
+                              border: '1px solid #86efac',
+                              fontWeight: 800
+                            }}
+                          >
+                            🎉 Hire
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={() => handleStatusChange(app.id, 'REJECTED')}
+                            className="btn btn-sm"
+                            style={{
+                              background: app.status === 'REJECTED' ? '#dc2626' : '#ffffff',
+                              color: app.status === 'REJECTED' ? '#ffffff' : '#b91c1c',
+                              border: '1px solid #fca5a5'
+                            }}
+                          >
+                            ❌ Decline
+                          </button>
                         </div>
                       </div>
-                    ))}
-                  </div>
-                )}
-              </>
-            ) : (
-              <div className="py-24 text-center text-slate-400 text-xs">
-                Select a job from the left column to view and evaluate applicants.
-              </div>
-            )}
-          </div>
+
+                    </div>
+                  ))}
+                </div>
+              )}
+            </>
+          ) : (
+            <div style={{ padding: '60px', textAlign: 'center', color: '#94a3b8' }}>
+              Select a job listing on the left to review applicants.
+            </div>
+          )}
         </div>
 
       </div>

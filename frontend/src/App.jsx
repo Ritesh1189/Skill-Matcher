@@ -23,13 +23,7 @@ import {
   RotateCcw, 
   BookOpen, 
   ExternalLink,
-  Database,
-  Cpu,
-  Layers,
-  Sparkles,
-  UserCheck,
-  Briefcase,
-  Users
+  Sparkles
 } from 'lucide-react';
 
 export default function App() {
@@ -45,7 +39,7 @@ export default function App() {
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [isPostJobModalOpen, setIsPostJobModalOpen] = useState(false);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
-  const [toast, setToast] = useState('');
+  const [toast, setToast] = useState(null);
 
   // Initial Boot
   useEffect(() => {
@@ -84,7 +78,6 @@ export default function App() {
 
   const loadMatchesAndApplications = async (candidateId) => {
     try {
-      // Fetch ranked job matches for candidate
       const rankedMatches = await matchApi.getRankedJobsForCandidate(candidateId);
       const matchMap = {};
       (rankedMatches || []).forEach(item => {
@@ -94,7 +87,6 @@ export default function App() {
       });
       setMatchesByJobId(matchMap);
 
-      // Fetch candidate applications
       const apps = await applicationsApi.getByCandidate(candidateId);
       setCandidateApplications(apps || []);
     } catch (err) {
@@ -145,7 +137,6 @@ export default function App() {
       setCandidateApplications(prev => [app, ...prev]);
       showToast(`Successfully applied to ${job.title}! Match score: ${app.matchScore}%`);
       
-      // Update applicant count locally
       setJobs(prev => prev.map(j => j.id === job.id ? { ...j, applicantsCount: (j.applicantsCount || 0) + 1 } : j));
       
       if (selectedJob?.id === job.id) {
@@ -159,7 +150,7 @@ export default function App() {
 
   const handleJobCreated = async (newJob) => {
     setJobs(prev => [newJob, ...prev]);
-    showToast(`Job listing "${newJob.title}" posted successfully!`);
+    showToast(`Job opening "${newJob.title}" posted successfully!`);
     if (currentUser?.id && currentUser.role === 'CANDIDATE') {
       loadMatchesAndApplications(currentUser.id);
     }
@@ -190,23 +181,31 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', background: '#f8fafc' }}>
       
       {/* Toast Notification */}
       {toast && (
-        <div className="fixed bottom-20 right-6 z-50 animate-fadeIn">
-          <div className={`p-4 rounded-2xl border text-xs font-bold flex items-center gap-3 shadow-2xl backdrop-blur-xl ${
-            toast.isError 
-              ? 'bg-red-950/95 border-red-500 text-red-200' 
-              : 'bg-emerald-950/95 border-emerald-500 text-emerald-200'
-          }`}>
-            {toast.isError ? <AlertCircle size={18} className="text-red-400" /> : <CheckCircle2 size={18} className="text-emerald-400" />}
+        <div style={{ position: 'fixed', bottom: '60px', right: '24px', zIndex: 100 }}>
+          <div style={{
+            background: '#ffffff',
+            border: `1px solid ${toast.isError ? '#fca5a5' : '#86efac'}`,
+            borderRadius: '8px',
+            padding: '12px 18px',
+            boxShadow: '0 10px 25px -5px rgba(0,0,0,0.1)',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
+            fontSize: '0.85rem',
+            fontWeight: 700,
+            color: toast.isError ? '#b91c1c' : '#15803d'
+          }}>
+            {toast.isError ? <AlertCircle size={18} /> : <CheckCircle2 size={18} />}
             <span>{toast.message}</span>
           </div>
         </div>
       )}
 
-      {/* Top Navbar */}
+      {/* Top Navbar (Naukri style) */}
       <Navbar 
         currentUser={currentUser}
         onSwitchUser={handleSwitchUser}
@@ -218,8 +217,8 @@ export default function App() {
         systemHealth={systemHealth}
       />
 
-      {/* Main Content View */}
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 md:px-8 pb-24">
+      {/* Main Content Area */}
+      <main style={{ flex: 1, paddingBottom: '70px' }}>
         {activeTab === 'jobs' && (
           <BrowseJobs 
             jobs={jobs}
@@ -259,61 +258,55 @@ export default function App() {
         )}
       </main>
 
-      {/* Persistent Bottom Quick-Switch Bar for Real-Time Role Testing */}
-      <div className="fixed bottom-0 inset-x-0 bg-slate-950/95 border-t border-white/20 backdrop-blur-xl z-40 py-2.5 px-4 shadow-2xl">
-        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
-          
-          <div className="flex items-center gap-2">
-            <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
-            <span className="text-white font-extrabold uppercase tracking-wider text-[11px]">Active Persona:</span>
-            <span className={`px-2.5 py-0.5 rounded-full font-black text-xs ${
-              currentUser?.role === 'CANDIDATE' 
-                ? 'bg-emerald-500 text-white' 
-                : 'bg-white text-slate-950'
-            }`}>
-              {currentUser?.name || 'Guest'} ({currentUser?.role || 'Visitor'})
+      {/* Persistent Bottom Bar (Indeed/Naukri Testing Helper) */}
+      <div className="naukri-bottom-bar">
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#16a34a' }}></span>
+          <span style={{ fontWeight: 700, color: '#0f172a' }}>Active Profile:</span>
+          <span style={{ color: '#16a34a', fontWeight: 800 }}>
+            {currentUser?.name || 'Guest'} ({currentUser?.role})
+          </span>
+          {currentUser?.role === 'CANDIDATE' && (
+            <span style={{ color: '#64748b' }}>
+              • Skills: {currentUser.skills?.slice(0, 3).join(', ')}...
             </span>
-            {currentUser?.role === 'CANDIDATE' && (
-              <span className="text-slate-400 hidden md:inline text-[11px]">
-                • Skills: {currentUser.skills?.slice(0, 3).join(', ')}...
-              </span>
-            )}
-          </div>
+          )}
+        </div>
 
-          <div className="flex items-center gap-2 flex-wrap">
-            <span className="text-slate-400 font-semibold text-[11px]">1-Click Switch:</span>
-            <button
-              onClick={() => handleSwitchUser('alex.chen@example.com')}
-              className={`px-3 py-1 rounded-full text-xs font-bold transition-all border ${
-                currentUser?.email?.includes('alex')
-                  ? 'bg-emerald-500 text-white border-emerald-400 shadow-sm shadow-emerald-500/40'
-                  : 'bg-white/10 text-slate-300 border-white/15 hover:bg-white/20 hover:text-white'
-              }`}
-            >
-              Candidate (Alex Chen)
-            </button>
-            <button
-              onClick={() => handleSwitchUser('recruiter@techmatch.com')}
-              className={`px-3 py-1 rounded-full text-xs font-bold transition-all border ${
-                currentUser?.role === 'RECRUITER'
-                  ? 'bg-white text-slate-950 border-white shadow-sm font-black'
-                  : 'bg-white/10 text-slate-300 border-white/15 hover:bg-white/20 hover:text-white'
-              }`}
-            >
-              Recruiter (Emma Watson)
-            </button>
-            <a
-              href="http://localhost:8080/swagger-ui.html"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="px-3 py-1 rounded-full text-xs font-black bg-emerald-950/60 text-emerald-300 border border-emerald-500/40 hover:bg-emerald-900/80 transition-all flex items-center gap-1 ml-2"
-            >
-              <BookOpen size={12} />
-              Swagger UI
-              <ExternalLink size={10} />
-            </a>
-          </div>
-
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <span style={{ color: '#64748b', fontSize: '0.75rem' }}>Quick Persona Switch:</span>
+          <button
+            onClick={() => handleSwitchUser('alex.morgan@example.com')}
+            className="btn btn-sm"
+            style={{
+              background: currentUser?.email?.includes('alex') ? '#16a34a' : '#ffffff',
+              color: currentUser?.email?.includes('alex') ? '#ffffff' : '#0f172a',
+              borderColor: '#cbd5e1'
+            }}
+          >
+            Candidate (Alex Morgan)
+          </button>
+          <button
+            onClick={() => handleSwitchUser('emma.recruiter@cloudscale.io')}
+            className="btn btn-sm"
+            style={{
+              background: currentUser?.role === 'RECRUITER' ? '#16a34a' : '#ffffff',
+              color: currentUser?.role === 'RECRUITER' ? '#ffffff' : '#0f172a',
+              borderColor: '#cbd5e1'
+            }}
+          >
+            Recruiter (Emma Watson)
+          </button>
+          <a
+            href="http://localhost:8080/swagger-ui.html"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="btn btn-sm"
+            style={{ background: '#ecfdf5', color: '#15803d', borderColor: '#86efac' }}
+          >
+            <BookOpen size={13} />
+            <span>Swagger Docs</span>
+          </a>
         </div>
       </div>
 
@@ -355,42 +348,33 @@ export default function App() {
         />
       )}
 
-      {/* Footer */}
-      <footer className="mt-auto border-t border-slate-800/80 bg-slate-950/80 backdrop-blur-md py-8 px-4 md:px-8 text-xs text-slate-400 mb-12">
-        <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
-          
-          <div className="flex items-center gap-3">
-            <span className="font-extrabold text-white tracking-tight">Skill Match Job Portal</span>
-            <span className="text-slate-600">•</span>
-            <div className="flex items-center gap-2">
-              <span className="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-[10px] font-bold">Green Matches</span>
-              <span className="px-2 py-0.5 rounded bg-white/10 text-white border border-white/20 text-[10px] font-bold">White Precision</span>
-              <span className="px-2 py-0.5 rounded bg-red-500/20 text-red-300 border border-red-500/30 text-[10px] font-bold">Red Skill Gaps</span>
-            </div>
+      {/* Footer (Naukri style clean footer) */}
+      <footer style={{ background: '#ffffff', borderTop: '1px solid #e2e8f0', padding: '24px 20px', fontSize: '0.8rem', color: '#64748b', marginBottom: '40px' }}>
+        <div style={{ maxWidth: '1280px', margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <span style={{ fontWeight: 800, color: '#0f172a' }}>SkillMatch Portal</span>
+            <span>•</span>
+            <span>Inspired by Naukri & Indeed Recruitment Standards</span>
           </div>
 
-          <div className="flex items-center gap-4 flex-wrap">
-            <a 
-              href="http://localhost:8080/swagger-ui.html"
-              target="_blank" 
-              rel="noopener noreferrer" 
-              className="text-emerald-400 hover:text-emerald-300 flex items-center gap-1 font-bold"
-            >
-              <BookOpen size={13} />
-              <span>Swagger REST API</span>
-              <ExternalLink size={11} />
-            </a>
-
+          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
             <button
               onClick={handleResetSeedData}
-              className="text-slate-400 hover:text-white flex items-center gap-1 transition-colors font-medium"
-              title="Reset demonstration data"
+              style={{ background: 'none', border: 'none', color: '#64748b', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.8rem' }}
             >
               <RotateCcw size={13} />
-              <span>Reset Demo Data</span>
+              Reset Demo Data
             </button>
+            <a 
+              href="http://localhost:8080/swagger-ui.html"
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{ color: '#16a34a', fontWeight: 600, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '4px' }}
+            >
+              Swagger REST API
+              <ExternalLink size={12} />
+            </a>
           </div>
-
         </div>
       </footer>
 

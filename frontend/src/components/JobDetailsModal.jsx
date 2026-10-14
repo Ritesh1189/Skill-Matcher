@@ -16,7 +16,6 @@ import {
   Award
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
-import MatchScoreBadge from './MatchScoreBadge';
 
 export default function JobDetailsModal({ 
   job, 
@@ -38,10 +37,10 @@ export default function JobDetailsModal({
     try {
       await onApply(job, coverNote);
       confetti({
-        particleCount: 100,
-        spread: 70,
+        particleCount: 90,
+        spread: 60,
         origin: { y: 0.6 },
-        colors: ['#10b981', '#ffffff', '#ef4444']
+        colors: ['#16a34a', '#ffffff', '#dc2626']
       });
     } finally {
       setSubmitting(false);
@@ -54,140 +53,163 @@ export default function JobDetailsModal({
     setTimeout(() => setCopiedLink(false), 2000);
   };
 
+  const score = matchResult?.matchPercentage ?? 0;
+
   return (
     <div className="modal-overlay" onClick={onClose}>
       <div 
-        className="modal-content relative p-6 sm:p-8 border border-white/20 bg-slate-900/95 shadow-2xl"
+        className="modal-content"
         onClick={(e) => e.stopPropagation()}
+        style={{ maxWidth: '720px' }}
       >
         {/* Close Button */}
         <button 
           onClick={onClose}
-          className="absolute top-5 right-5 p-2 rounded-xl bg-slate-800/90 text-white hover:bg-red-500 hover:text-white transition-all border border-white/10"
+          style={{
+            position: 'absolute',
+            top: '20px',
+            right: '20px',
+            background: '#f1f5f9',
+            border: 'none',
+            borderRadius: '50%',
+            width: '32px',
+            height: '32px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            cursor: 'pointer',
+            color: '#64748b'
+          }}
           title="Close modal"
         >
           <X size={18} />
         </button>
 
         {/* Modal Header */}
-        <div className="mb-6 pr-10">
-          <div className="flex items-center gap-2 mb-2 flex-wrap">
-            <span className="text-xs font-extrabold px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 uppercase tracking-wider flex items-center gap-1.5">
-              <Building2 size={13} />
+        <div style={{ marginBottom: '20px', paddingRight: '40px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px', flexWrap: 'wrap' }}>
+            <span style={{ fontSize: '0.8rem', fontWeight: 800, padding: '3px 10px', borderRadius: '4px', background: '#ecfdf5', color: '#166534', border: '1px solid #86efac' }}>
               {job.company}
             </span>
-            <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-white/10 text-white border border-white/20">
+            <span style={{ fontSize: '0.75rem', fontWeight: 600, padding: '3px 8px', borderRadius: '4px', background: '#f1f5f9', color: '#475569' }}>
               {job.type}
             </span>
-            <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-slate-800 text-slate-300 border border-slate-700">
-              {job.experienceLevel}
+            <span style={{ fontSize: '0.75rem', fontWeight: 600, padding: '3px 8px', borderRadius: '4px', background: '#f1f5f9', color: '#475569' }}>
+              {job.experienceLevel || 'Mid Level'}
             </span>
           </div>
 
-          <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight mb-2">
+          <h2 style={{ fontSize: '1.5rem', fontWeight: 800, color: '#0f172a', lineHeight: 1.2, marginBottom: '8px' }}>
             {job.title}
           </h2>
 
-          <div className="flex items-center gap-4 text-xs text-slate-300 flex-wrap">
-            <span className="flex items-center gap-1.5">
-              <MapPin size={14} className="text-emerald-400" />
-              <strong className="text-white">{job.location}</strong>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '16px', fontSize: '0.85rem', color: '#64748b', flexWrap: 'wrap' }}>
+            <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+              <MapPin size={15} style={{ color: '#16a34a' }} />
+              <strong style={{ color: '#334155' }}>{job.location}</strong>
             </span>
             {job.salaryRange && (
-              <span className="flex items-center gap-1 text-emerald-400 font-bold px-2 py-0.5 rounded bg-emerald-950/40 border border-emerald-500/30">
-                <DollarSign size={13} />
+              <span style={{ display: 'flex', alignItems: 'center', gap: '4px', color: '#16a34a', fontWeight: 700 }}>
+                <DollarSign size={15} />
                 {job.salaryRange}
               </span>
             )}
-            <span className="flex items-center gap-1.5 text-slate-400">
-              <Clock size={14} />
-              Posted by <span className="text-white font-medium">{job.recruiterName || 'Talent Partner'}</span>
+            <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+              <Clock size={15} />
+              Posted by {job.recruiterName || 'Talent Partner'}
             </span>
             <button 
               onClick={handleCopy}
-              className="text-slate-400 hover:text-white flex items-center gap-1 text-[11px] underline ml-auto"
+              style={{ background: 'none', border: 'none', color: '#16a34a', fontSize: '0.75rem', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px', marginLeft: 'auto' }}
             >
-              <Share2 size={12} />
-              {copiedLink ? 'Link Copied!' : 'Share Role'}
+              <Share2 size={13} />
+              {copiedLink ? 'Link Copied!' : 'Share'}
             </button>
           </div>
         </div>
 
-        {/* Skill Match Breakdown Card (For Candidates) */}
+        {/* Live Skill Match Breakdown Card (For Candidates) */}
         {isCandidate && matchResult && (
-          <div className="mb-6 p-5 rounded-2xl bg-slate-950/80 border-2 border-emerald-500/40 shadow-lg shadow-emerald-500/10">
-            <div className="flex items-center justify-between gap-3 mb-4 pb-3 border-b border-slate-800">
-              <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center border border-emerald-500/30">
+          <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '16px', marginBottom: '20px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingBottom: '12px', marginBottom: '12px', borderBottom: '1px solid #e2e8f0' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: '#ecfdf5', color: '#16a34a', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                   <Sparkles size={18} />
                 </div>
                 <div>
-                  <h3 className="text-sm font-extrabold text-white">Algorithmic Skill Compatibility</h3>
-                  <p className="text-[11px] text-slate-400">Automated overlap scoring between your profile and job specs</p>
+                  <h3 style={{ fontSize: '0.9rem', fontWeight: 800, color: '#0f172a' }}>Skill Compatibility Analysis</h3>
+                  <p style={{ fontSize: '0.75rem', color: '#64748b' }}>Automated overlap comparison between your skills and role requirements</p>
                 </div>
               </div>
-              <MatchScoreBadge 
-                score={matchResult.matchPercentage}
-                matchedCount={matchResult.matchedCount}
-                totalCount={matchResult.totalRequiredCount}
-                size="md"
-              />
+
+              <div 
+                style={{
+                  padding: '6px 14px',
+                  borderRadius: '9999px',
+                  background: score >= 70 ? '#ecfdf5' : score >= 50 ? '#fefce8' : '#fef2f2',
+                  color: score >= 70 ? '#15803d' : score >= 50 ? '#a16207' : '#b91c1c',
+                  border: `1px solid ${score >= 70 ? '#86efac' : score >= 50 ? '#fde047' : '#fca5a5'}`,
+                  fontSize: '0.9rem',
+                  fontWeight: 900
+                }}
+              >
+                {score}% Match
+              </div>
             </div>
 
-            {/* Transparent Mathematical Formula Box */}
-            <div className="p-3.5 mb-4 rounded-xl bg-slate-900 border border-white/10 text-xs font-mono text-slate-200">
-              <div className="text-[11px] text-emerald-400 font-bold mb-1 flex items-center gap-1.5 font-sans uppercase tracking-wider">
+            {/* Formula Explanation box */}
+            <div style={{ background: '#ffffff', border: '1px solid #cbd5e1', borderRadius: '8px', padding: '10px 14px', fontSize: '0.8rem', fontFamily: 'var(--font-mono)', marginBottom: '12px', color: '#334155' }}>
+              <div style={{ fontSize: '0.75rem', fontWeight: 800, color: '#16a34a', textTransform: 'uppercase', marginBottom: '3px', fontFamily: 'var(--font-sans)', display: 'flex', alignItems: 'center', gap: '4px' }}>
                 <Info size={13} />
-                <span>Deterministic Overlap Equation</span>
+                <span>Transparent Scoring Equation</span>
               </div>
-              <div className="text-sm py-0.5">
-                Match score = (<span className="text-emerald-400 font-bold">{matchResult.matchedCount} matched</span> / <span className="text-white font-bold">{matchResult.totalRequiredCount} required</span>) × 100 = <span className="text-emerald-400 font-extrabold text-base">{matchResult.matchPercentage}%</span>
+              <div style={{ fontWeight: 700 }}>
+                Match score = ({matchResult.matchedCount} matched / {matchResult.totalRequiredCount} required) × 100 = <span style={{ color: '#16a34a', fontWeight: 900 }}>{score}%</span>
               </div>
-              <div className="text-slate-400 text-xs mt-1.5 font-sans leading-relaxed">
+              <div style={{ fontSize: '0.75rem', color: '#64748b', marginTop: '4px', fontFamily: 'var(--font-sans)' }}>
                 {matchResult.explanation}
               </div>
             </div>
 
-            {/* Side-by-Side Green (Matched) vs Red (Missing) Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {/* Green Matched Column */}
-              <div className="p-3.5 rounded-xl bg-emerald-950/30 border border-emerald-500/30">
-                <span className="text-xs font-extrabold text-emerald-400 uppercase tracking-wider block mb-2 flex items-center gap-1.5">
-                  <CheckCircle2 size={14} className="stroke-[2.5]" />
+            {/* Matched vs Missing Grid */}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+              {/* Green Matched */}
+              <div style={{ background: '#ffffff', border: '1px solid #86efac', borderRadius: '8px', padding: '10px' }}>
+                <span style={{ fontSize: '0.75rem', fontWeight: 800, color: '#15803d', textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: '4px', marginBottom: '8px' }}>
+                  <CheckCircle2 size={13} />
                   <span>Skills You Have ({matchResult.matchedSkills?.length || 0})</span>
                 </span>
-                <div className="flex flex-wrap gap-1.5">
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
                   {matchResult.matchedSkills?.length > 0 ? (
-                    matchResult.matchedSkills.map((skill, i) => (
-                      <span key={i} className="skill-chip matched text-xs font-bold">
-                        <Check size={12} className="stroke-[3]" />
-                        {skill}
+                    matchResult.matchedSkills.map((sk, i) => (
+                      <span key={i} className="skill-chip matched">
+                        <Check size={10} strokeWidth={3} />
+                        {sk}
                       </span>
                     ))
                   ) : (
-                    <span className="text-xs text-slate-400 italic">No direct skill matches found in profile</span>
+                    <span style={{ fontSize: '0.75rem', color: '#94a3b8', fontStyle: 'italic' }}>None matched</span>
                   )}
                 </div>
               </div>
 
-              {/* Red Missing Column */}
-              <div className="p-3.5 rounded-xl bg-red-950/30 border border-red-500/30">
-                <span className="text-xs font-extrabold text-red-400 uppercase tracking-wider block mb-2 flex items-center gap-1.5">
-                  <XCircle size={14} className="stroke-[2.5]" />
-                  <span>Missing Requirements ({matchResult.missingSkills?.length || 0})</span>
+              {/* Red Missing */}
+              <div style={{ background: '#ffffff', border: '1px solid #fca5a5', borderRadius: '8px', padding: '10px' }}>
+                <span style={{ fontSize: '0.75rem', fontWeight: 800, color: '#b91c1c', textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: '4px', marginBottom: '8px' }}>
+                  <XCircle size={13} />
+                  <span>Missing Skills ({matchResult.missingSkills?.length || 0})</span>
                 </span>
-                <div className="flex flex-wrap gap-1.5">
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
                   {matchResult.missingSkills?.length > 0 ? (
-                    matchResult.missingSkills.map((skill, i) => (
-                      <span key={i} className="skill-chip missing text-xs font-bold">
-                        <X size={11} className="stroke-[3]" />
-                        {skill}
+                    matchResult.missingSkills.map((sk, i) => (
+                      <span key={i} className="skill-chip missing">
+                        <X size={10} strokeWidth={3} />
+                        {sk}
                       </span>
                     ))
                   ) : (
-                    <span className="text-xs text-emerald-400 font-bold flex items-center gap-1">
-                      <Award size={14} />
-                      Perfect 100% Match! All requirements met.
+                    <span style={{ fontSize: '0.75rem', color: '#16a34a', fontWeight: 700 }}>
+                      All requirements met!
                     </span>
                   )}
                 </div>
@@ -197,21 +219,25 @@ export default function JobDetailsModal({
         )}
 
         {/* Job Description */}
-        <div className="mb-6">
-          <h4 className="text-xs font-bold text-slate-300 uppercase tracking-wider mb-2">Role Overview & Responsibilities</h4>
-          <p className="text-sm text-slate-300 leading-relaxed whitespace-pre-line bg-slate-950/40 p-4 rounded-xl border border-white/10">
+        <div style={{ marginBottom: '20px' }}>
+          <h4 style={{ fontSize: '0.85rem', fontWeight: 800, color: '#0f172a', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '8px' }}>
+            Job Description & Responsibilities
+          </h4>
+          <p style={{ fontSize: '0.875rem', color: '#334155', lineHeight: 1.6, whiteSpace: 'pre-line', background: '#f8fafc', padding: '14px', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
             {job.description}
           </p>
         </div>
 
-        {/* Bonus / Nice to Have Skills */}
+        {/* Nice to Have Skills */}
         {job.niceToHaveSkills && job.niceToHaveSkills.length > 0 && (
-          <div className="mb-6">
-            <h4 className="text-xs font-bold text-slate-300 uppercase tracking-wider mb-2">Bonus / Nice to Have Technologies</h4>
-            <div className="flex flex-wrap gap-2">
-              {job.niceToHaveSkills.map((skill, index) => (
-                <span key={index} className="skill-chip text-xs bg-white/10 text-white border border-white/20 font-medium">
-                  {skill}
+          <div style={{ marginBottom: '20px' }}>
+            <h4 style={{ fontSize: '0.85rem', fontWeight: 800, color: '#0f172a', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '8px' }}>
+              Bonus / Preferred Technologies
+            </h4>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+              {job.niceToHaveSkills.map((sk, idx) => (
+                <span key={idx} className="skill-chip neutral">
+                  {sk}
                 </span>
               ))}
             </div>
@@ -220,39 +246,38 @@ export default function JobDetailsModal({
 
         {/* Application Submission Form */}
         {isCandidate && (
-          <div className="pt-4 border-t border-slate-800">
+          <div style={{ paddingTop: '16px', borderTop: '1px solid #e2e8f0' }}>
             {hasApplied ? (
-              <div className="p-4 rounded-xl bg-emerald-950/50 border-2 border-emerald-500/50 text-emerald-200 flex items-center gap-3 shadow-lg shadow-emerald-900/30">
-                <CheckCircle2 size={28} className="text-emerald-400 shrink-0" />
+              <div style={{ padding: '14px', borderRadius: '8px', background: '#ecfdf5', border: '1px solid #86efac', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <CheckCircle2 size={24} style={{ color: '#16a34a', shrink: 0 }} />
                 <div>
-                  <div className="font-extrabold text-sm text-white">Application Successfully Submitted!</div>
-                  <div className="text-xs text-emerald-300">
-                    The hiring team has your profile and match score ({matchResult?.matchPercentage}%). Track status in "My Applications".
+                  <div style={{ fontSize: '0.9rem', fontWeight: 800, color: '#166534' }}>Application Already Submitted</div>
+                  <div style={{ fontSize: '0.75rem', color: '#15803d' }}>
+                    You can track your interview and review status in the "My Applications" tab.
                   </div>
                 </div>
               </div>
             ) : (
-              <form onSubmit={handleSubmit} className="space-y-3">
-                <label className="form-label flex items-center justify-between">
-                  <span>Cover Note to Recruiter (Optional)</span>
-                  <span className="text-[11px] text-slate-400 font-normal">{coverNote.length}/300 chars</span>
+              <form onSubmit={handleSubmit}>
+                <label className="form-label">
+                  Note to Hiring Manager (Optional)
                 </label>
                 <textarea
                   rows="3"
-                  maxLength={300}
                   className="form-control"
-                  placeholder="Tell the hiring manager why your background makes you a strong candidate for this position..."
+                  placeholder="Share a brief introduction or highlights of your projects..."
                   value={coverNote}
                   onChange={(e) => setCoverNote(e.target.value)}
+                  style={{ marginBottom: '12px' }}
                 />
                 
-                <div className="flex items-center justify-end gap-3 pt-2">
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '10px' }}>
                   <button type="button" onClick={onClose} className="btn btn-secondary">
                     Cancel
                   </button>
-                  <button type="submit" disabled={submitting} className="btn btn-green text-sm sm:btn-lg font-extrabold">
-                    <Send size={16} />
-                    <span>{submitting ? 'Submitting Application...' : 'Apply with Profile'}</span>
+                  <button type="submit" disabled={submitting} className="btn btn-green btn-lg">
+                    <Send size={15} />
+                    <span>{submitting ? 'Submitting...' : 'Apply on Portal'}</span>
                   </button>
                 </div>
               </form>
@@ -261,9 +286,9 @@ export default function JobDetailsModal({
         )}
 
         {!isCandidate && (
-          <div className="pt-4 border-t border-slate-800 flex justify-end">
-            <button onClick={onClose} className="btn btn-white font-bold">
-              Done
+          <div style={{ paddingTop: '16px', borderTop: '1px solid #e2e8f0', display: 'flex', justifyContent: 'flex-end' }}>
+            <button onClick={onClose} className="btn btn-secondary">
+              Close Details
             </button>
           </div>
         )}

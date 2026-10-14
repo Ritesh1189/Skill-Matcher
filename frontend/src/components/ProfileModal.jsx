@@ -62,34 +62,50 @@ export default function ProfileModal({ user, onClose, onProfileUpdated }) {
   return (
     <div className="modal-overlay" onClick={onClose}>
       <div 
-        className="modal-content relative p-6 sm:p-8 max-w-2xl border-2 border-white/20 bg-slate-900 shadow-2xl"
+        className="modal-content"
         onClick={(e) => e.stopPropagation()}
+        style={{ maxWidth: '640px' }}
       >
         <button 
           onClick={onClose}
-          className="absolute top-5 right-5 p-2 rounded-xl bg-slate-800 text-white hover:bg-red-500 hover:text-white transition-all"
+          style={{
+            position: 'absolute',
+            top: '20px',
+            right: '20px',
+            background: '#f1f5f9',
+            border: 'none',
+            borderRadius: '50%',
+            width: '32px',
+            height: '32px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            cursor: 'pointer',
+            color: '#64748b'
+          }}
         >
           <X size={18} />
         </button>
 
-        <div className="flex items-center gap-2 mb-1">
-          <div className="w-8 h-8 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center border border-emerald-500/30">
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+          <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: '#ecfdf5', color: '#16a34a', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <User size={18} />
           </div>
-          <h2 className="text-xl sm:text-2xl font-black text-white">Edit Candidate Profile & Skills</h2>
+          <h2 style={{ fontSize: '1.25rem', fontWeight: 800, color: '#0f172a' }}>Candidate Profile & Skills</h2>
         </div>
-        <p className="text-xs text-slate-300 mb-5">
-          Updating your skills immediately recomputes your match percentages across all listed job openings.
+        <p style={{ fontSize: '0.8rem', color: '#64748b', marginBottom: '18px' }}>
+          Update your verified skills to immediately recompute your job match percentages.
         </p>
 
         {error && (
-          <div className="p-3.5 mb-4 rounded-xl bg-red-950/60 border-2 border-red-500 text-red-200 text-xs font-bold">
+          <div style={{ padding: '10px 14px', borderRadius: '6px', background: '#fef2f2', border: '1px solid #fca5a5', color: '#b91c1c', fontSize: '0.8rem', fontWeight: 700, marginBottom: '14px' }}>
             {error}
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-4 text-xs">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <form onSubmit={handleSubmit}>
+          
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '12px' }}>
             <div>
               <label className="form-label">Full Name *</label>
               <input
@@ -101,7 +117,7 @@ export default function ProfileModal({ user, onClose, onProfileUpdated }) {
               />
             </div>
             <div>
-              <label className="form-label">Professional Headline / Title *</label>
+              <label className="form-label">Professional Headline *</label>
               <input
                 type="text"
                 className="form-control"
@@ -113,7 +129,7 @@ export default function ProfileModal({ user, onClose, onProfileUpdated }) {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '12px' }}>
             <div>
               <label className="form-label">Location</label>
               <input
@@ -121,7 +137,7 @@ export default function ProfileModal({ user, onClose, onProfileUpdated }) {
                 className="form-control"
                 value={formData.location}
                 onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-                placeholder="e.g. San Francisco, CA or Remote"
+                placeholder="e.g. San Francisco or Remote"
               />
             </div>
             <div>
@@ -137,62 +153,57 @@ export default function ProfileModal({ user, onClose, onProfileUpdated }) {
             </div>
           </div>
 
-          <div>
-            <label className="form-label">Education / University Degree</label>
+          <div style={{ marginBottom: '12px' }}>
+            <label className="form-label">Education / Degree</label>
             <input
               type="text"
               className="form-control"
               value={formData.education}
               onChange={(e) => setFormData({ ...formData, education: e.target.value })}
-              placeholder="e.g. B.S. in Computer Science, Stanford University"
+              placeholder="e.g. B.S. in Computer Science"
             />
           </div>
 
-          <div>
-            <label className="form-label">Professional Summary / Bio</label>
+          <div style={{ marginBottom: '14px' }}>
+            <label className="form-label">About You / Professional Bio</label>
             <textarea
-              rows="3"
+              rows="2"
               className="form-control"
               value={formData.bio}
               onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
-              placeholder="Brief summary of your background, architectural experience, and career goals..."
+              placeholder="Brief summary of your skills and projects..."
             />
           </div>
 
-          {/* SKILLS SECTION: Green highlighted with 1-click toggles */}
-          <div className="p-4 rounded-2xl bg-emerald-950/30 border-2 border-emerald-500/40 space-y-3">
-            <div className="flex items-center justify-between">
-              <div>
-                <label className="form-label text-emerald-400 font-extrabold flex items-center gap-1.5">
-                  <Sparkles size={14} />
-                  <span>Technical Skills ({formData.skills.length})</span>
-                </label>
-                <p className="text-[11px] text-slate-300">
-                  These skills are cross-referenced with job requirements for automated scoring.
-                </p>
-              </div>
-            </div>
+          {/* Technical Skills Box */}
+          <div style={{ background: '#f8fafc', border: '1px solid #cbd5e1', borderRadius: '8px', padding: '14px', marginBottom: '18px' }}>
+            <label className="form-label" style={{ color: '#16a34a', fontWeight: 800 }}>
+              Technical Skills ({formData.skills.length})
+            </label>
+            <p style={{ fontSize: '0.75rem', color: '#64748b', marginBottom: '8px' }}>
+              These skills determine your match percentage across job openings
+            </p>
 
-            <div className="flex flex-wrap gap-1.5 min-h-[36px]">
-              {formData.skills.map((skill, index) => (
-                <span key={index} className="skill-chip matched text-xs font-bold">
-                  {skill}
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginBottom: '10px' }}>
+              {formData.skills.map((sk, idx) => (
+                <span key={idx} className="skill-chip matched" style={{ fontSize: '0.75rem' }}>
+                  {sk}
                   <button
                     type="button"
-                    onClick={() => removeSkill(skill)}
-                    className="hover:text-red-400 p-0.5 rounded-full"
+                    onClick={() => removeSkill(sk)}
+                    style={{ background: 'none', border: 'none', color: '#dc2626', cursor: 'pointer', marginLeft: '4px' }}
                   >
-                    <X size={12} />
+                    &times;
                   </button>
                 </span>
               ))}
             </div>
 
-            <div className="flex gap-2">
+            <div style={{ display: 'flex', gap: '8px', marginBottom: '8px' }}>
               <input
                 type="text"
                 className="form-control"
-                placeholder="Type new skill and press Enter (e.g. Kafka, Redis, Vue.js)..."
+                placeholder="Type skill and press Enter..."
                 value={newSkill}
                 onChange={(e) => setNewSkill(e.target.value)}
                 onKeyDown={(e) => {
@@ -205,70 +216,44 @@ export default function ProfileModal({ user, onClose, onProfileUpdated }) {
               <button
                 type="button"
                 onClick={() => addSkill(newSkill)}
-                className="btn btn-green text-xs font-bold shrink-0"
+                className="btn btn-green btn-sm"
               >
-                <Plus size={14} />
-                Add
+                <Plus size={14} /> Add
               </button>
             </div>
 
-            {/* Quick Skills Selector */}
-            <div>
-              <span className="text-[11px] text-slate-300 font-semibold block mb-1">Click to toggle skills:</span>
-              <div className="flex flex-wrap gap-1">
-                {POPULAR_SKILLS.map((s, idx) => {
-                  const has = formData.skills.some(sk => sk.toLowerCase() === s.toLowerCase());
-                  return (
-                    <button
-                      key={idx}
-                      type="button"
-                      onClick={() => has ? removeSkill(s) : addSkill(s)}
-                      className={`px-2.5 py-0.5 rounded-full text-[11px] font-bold transition-all border ${
-                        has 
-                          ? 'bg-emerald-500 text-white border-emerald-400' 
-                          : 'bg-white/10 text-slate-300 border-white/15 hover:bg-white/20 hover:text-white'
-                      }`}
-                    >
-                      {has ? '✓ ' : '+ '}{s}
-                    </button>
-                  );
-                })}
-              </div>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
+              {POPULAR_SKILLS.map((s, idx) => {
+                const has = formData.skills.some(sk => sk.toLowerCase() === s.toLowerCase());
+                return (
+                  <button
+                    key={idx}
+                    type="button"
+                    onClick={() => has ? removeSkill(s) : addSkill(s)}
+                    className="skill-chip"
+                    style={{
+                      background: has ? '#ecfdf5' : '#ffffff',
+                      color: has ? '#15803d' : '#64748b',
+                      borderColor: has ? '#86efac' : '#e2e8f0',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    {has ? '✓ ' : '+ '}{s}
+                  </button>
+                );
+              })}
             </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label className="form-label">GitHub URL</label>
-              <input
-                type="url"
-                className="form-control"
-                value={formData.githubUrl}
-                onChange={(e) => setFormData({ ...formData, githubUrl: e.target.value })}
-                placeholder="https://github.com/yourhandle"
-              />
-            </div>
-            <div>
-              <label className="form-label">LinkedIn URL</label>
-              <input
-                type="url"
-                className="form-control"
-                value={formData.linkedinUrl}
-                onChange={(e) => setFormData({ ...formData, linkedinUrl: e.target.value })}
-                placeholder="https://linkedin.com/in/yourhandle"
-              />
-            </div>
-          </div>
-
-          <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-800">
-            <button type="button" onClick={onClose} className="btn btn-secondary font-bold">
+          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
+            <button type="button" onClick={onClose} className="btn btn-secondary">
               Cancel
             </button>
-            <button type="submit" disabled={saving} className="btn btn-green font-black sm:btn-lg">
-              <Save size={16} />
-              <span>{saving ? 'Saving Profile...' : 'Save Profile Changes'}</span>
+            <button type="submit" disabled={saving} className="btn btn-green btn-lg">
+              {saving ? 'Saving...' : 'Save Profile'}
             </button>
           </div>
+
         </form>
 
       </div>

@@ -49,7 +49,7 @@ export default function AuthModal({ onClose, onAuthSuccess }) {
           email: formData.email,
           password: formData.password,
           role: formData.role,
-          title: formData.title || (formData.role === 'CANDIDATE' ? 'Software Engineer' : 'Talent Partner'),
+          title: formData.title || (formData.role === 'CANDIDATE' ? 'Software Engineer' : 'Talent Lead'),
           company: formData.company,
           location: formData.location || 'Remote',
           skills: formData.role === 'CANDIDATE' ? formData.skills : [],
@@ -66,7 +66,7 @@ export default function AuthModal({ onClose, onAuthSuccess }) {
         onClose();
       }
     } catch (err) {
-      setError(err.message || 'Authentication failed. Please verify email and password.');
+      setError(err.message || 'Authentication failed. Please verify credentials.');
     } finally {
       setLoading(false);
     }
@@ -75,77 +75,112 @@ export default function AuthModal({ onClose, onAuthSuccess }) {
   return (
     <div className="modal-overlay" onClick={onClose}>
       <div 
-        className="modal-content relative p-6 sm:p-8 max-w-md border-2 border-white/20 bg-slate-900 shadow-2xl"
+        className="modal-content"
         onClick={(e) => e.stopPropagation()}
+        style={{ maxWidth: '440px' }}
       >
         <button 
           onClick={onClose}
-          className="absolute top-5 right-5 p-2 rounded-xl bg-slate-800 text-white hover:bg-red-500 hover:text-white transition-all"
+          style={{
+            position: 'absolute',
+            top: '20px',
+            right: '20px',
+            background: '#f1f5f9',
+            border: 'none',
+            borderRadius: '50%',
+            width: '32px',
+            height: '32px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            cursor: 'pointer',
+            color: '#64748b'
+          }}
         >
           <X size={18} />
         </button>
 
         {/* Tab Switcher */}
-        <div className="flex border-b border-white/10 mb-6">
+        <div style={{ display: 'flex', borderBottom: '1px solid #e2e8f0', marginBottom: '20px' }}>
           <button
             type="button"
             onClick={() => { setIsRegister(false); setError(''); }}
-            className={`flex-1 pb-3 text-sm font-extrabold border-b-2 transition-all ${
-              !isRegister ? 'border-emerald-500 text-emerald-400' : 'border-transparent text-slate-400 hover:text-white'
-            }`}
+            style={{
+              flex: 1,
+              paddingBottom: '12px',
+              fontSize: '0.9rem',
+              fontWeight: 800,
+              background: 'none',
+              border: 'none',
+              borderBottom: !isRegister ? '2px solid #16a34a' : '2px solid transparent',
+              color: !isRegister ? '#16a34a' : '#64748b',
+              cursor: 'pointer'
+            }}
           >
             Sign In
           </button>
           <button
             type="button"
             onClick={() => { setIsRegister(true); setError(''); }}
-            className={`flex-1 pb-3 text-sm font-extrabold border-b-2 transition-all ${
-              isRegister ? 'border-emerald-500 text-emerald-400' : 'border-transparent text-slate-400 hover:text-white'
-            }`}
+            style={{
+              flex: 1,
+              paddingBottom: '12px',
+              fontSize: '0.9rem',
+              fontWeight: 800,
+              background: 'none',
+              border: 'none',
+              borderBottom: isRegister ? '2px solid #16a34a' : '2px solid transparent',
+              color: isRegister ? '#16a34a' : '#64748b',
+              cursor: 'pointer'
+            }}
           >
-            Create Account
+            Register
           </button>
         </div>
 
         {error && (
-          <div className="p-3.5 mb-4 rounded-xl bg-red-950/60 border-2 border-red-500 text-red-200 text-xs font-bold">
+          <div style={{ padding: '10px 14px', borderRadius: '6px', background: '#fef2f2', border: '1px solid #fca5a5', color: '#b91c1c', fontSize: '0.8rem', fontWeight: 700, marginBottom: '14px' }}>
             {error}
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-4 text-xs">
+        <form onSubmit={handleSubmit}>
           {isRegister && (
-            <div>
-              <label className="form-label">I am joining as:</label>
-              <div className="grid grid-cols-2 gap-2">
+            <div style={{ marginBottom: '12px' }}>
+              <label className="form-label">I am a:</label>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
                 <button
                   type="button"
                   onClick={() => setFormData({ ...formData, role: 'CANDIDATE' })}
-                  className={`py-2.5 px-3 rounded-xl font-black border text-center transition-all ${
-                    formData.role === 'CANDIDATE' 
-                      ? 'bg-emerald-500 text-white border-emerald-400 shadow-md shadow-emerald-500/30' 
-                      : 'bg-slate-950 border-white/10 text-slate-300 hover:text-white'
-                  }`}
+                  className="btn btn-sm"
+                  style={{
+                    background: formData.role === 'CANDIDATE' ? '#16a34a' : '#ffffff',
+                    color: formData.role === 'CANDIDATE' ? '#ffffff' : '#475569',
+                    border: '1px solid',
+                    borderColor: formData.role === 'CANDIDATE' ? '#16a34a' : '#cbd5e1'
+                  }}
                 >
                   Job Seeker
                 </button>
                 <button
                   type="button"
                   onClick={() => setFormData({ ...formData, role: 'RECRUITER' })}
-                  className={`py-2.5 px-3 rounded-xl font-black border text-center transition-all ${
-                    formData.role === 'RECRUITER' 
-                      ? 'bg-white text-slate-950 border-white shadow-md' 
-                      : 'bg-slate-950 border-white/10 text-slate-300 hover:text-white'
-                  }`}
+                  className="btn btn-sm"
+                  style={{
+                    background: formData.role === 'RECRUITER' ? '#16a34a' : '#ffffff',
+                    color: formData.role === 'RECRUITER' ? '#ffffff' : '#475569',
+                    border: '1px solid',
+                    borderColor: formData.role === 'RECRUITER' ? '#16a34a' : '#cbd5e1'
+                  }}
                 >
-                  Recruiter / Employer
+                  Employer
                 </button>
               </div>
             </div>
           )}
 
           {isRegister && (
-            <div>
+            <div style={{ marginBottom: '12px' }}>
               <label className="form-label">Full Name *</label>
               <input
                 type="text"
@@ -158,7 +193,7 @@ export default function AuthModal({ onClose, onAuthSuccess }) {
             </div>
           )}
 
-          <div>
+          <div style={{ marginBottom: '12px' }}>
             <label className="form-label">Email Address *</label>
             <input
               type="email"
@@ -170,7 +205,7 @@ export default function AuthModal({ onClose, onAuthSuccess }) {
             />
           </div>
 
-          <div>
+          <div style={{ marginBottom: '14px' }}>
             <label className="form-label">Password *</label>
             <input
               type="password"
@@ -183,12 +218,12 @@ export default function AuthModal({ onClose, onAuthSuccess }) {
           </div>
 
           {isRegister && formData.role === 'RECRUITER' && (
-            <div>
+            <div style={{ marginBottom: '12px' }}>
               <label className="form-label">Company Name *</label>
               <input
                 type="text"
                 className="form-control"
-                placeholder="e.g. Acme Tech Innovations"
+                placeholder="e.g. Acme Tech Solutions"
                 value={formData.company}
                 onChange={(e) => setFormData({ ...formData, company: e.target.value })}
                 required
@@ -196,70 +231,17 @@ export default function AuthModal({ onClose, onAuthSuccess }) {
             </div>
           )}
 
-          {isRegister && formData.role === 'CANDIDATE' && (
-            <div className="space-y-2 pt-1">
-              <label className="form-label text-emerald-400 font-extrabold flex items-center gap-1">
-                <Sparkles size={13} />
-                <span>Primary Skills (for instant matching)</span>
-              </label>
-              <div className="flex gap-2">
-                <input
-                  type="text"
-                  className="form-control"
-                  placeholder="e.g. Python, Docker, Spring Boot"
-                  value={newSkill}
-                  onChange={(e) => setNewSkill(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') {
-                      e.preventDefault();
-                      handleAddSkill();
-                    }
-                  }}
-                />
-                <button
-                  type="button"
-                  onClick={handleAddSkill}
-                  className="btn btn-green text-xs font-bold shrink-0"
-                >
-                  <Plus size={14} /> Add
-                </button>
-              </div>
-
-              <div className="flex flex-wrap gap-1 p-2.5 rounded-xl bg-slate-950/80 border border-emerald-500/30">
-                {formData.skills.map((skill, idx) => (
-                  <span key={idx} className="skill-chip matched text-xs font-bold">
-                    {skill}
-                    <button
-                      type="button"
-                      onClick={() => handleRemoveSkill(skill)}
-                      className="ml-1 text-slate-400 hover:text-red-400"
-                    >
-                      ×
-                    </button>
-                  </span>
-                ))}
-              </div>
-            </div>
-          )}
-
-          <div className="pt-2">
+          <div>
             <button
               type="submit"
               disabled={loading}
-              className="btn btn-green w-full py-3 font-black text-sm shadow-lg shadow-emerald-500/30"
+              className="btn btn-green w-full btn-lg"
             >
-              {loading ? 'Authenticating...' : isRegister ? 'Register & Enter Portal' : 'Sign In to Portal'}
+              {loading ? 'Authenticating...' : isRegister ? 'Register & Continue' : 'Sign In to Portal'}
             </button>
           </div>
-
-          <div className="text-center text-xs text-slate-400 pt-2 font-medium">
-            {isRegister ? (
-              <span>Already registered? Click Sign In above.</span>
-            ) : (
-              <span>Quick switch between demo Candidate and Recruiter profiles in top right.</span>
-            )}
-          </div>
         </form>
+
       </div>
     </div>
   );

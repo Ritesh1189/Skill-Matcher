@@ -10,11 +10,9 @@ import {
   ExternalLink,
   Sparkles,
   Inbox,
-  Filter,
-  ArrowRight
+  Filter
 } from 'lucide-react';
 import { applicationsApi } from '../services/api';
-import MatchScoreBadge from './MatchScoreBadge';
 
 export default function CandidateApplications({ candidate, onSelectJobId }) {
   const [applications, setApplications] = useState([]);
@@ -43,43 +41,43 @@ export default function CandidateApplications({ candidate, onSelectJobId }) {
     switch (status?.toUpperCase()) {
       case 'HIRED':
         return (
-          <span className="px-3 py-1 rounded-full text-xs font-black bg-emerald-500 text-white shadow-md shadow-emerald-500/30 flex items-center gap-1.5 border border-emerald-300">
-            <CheckCircle2 size={13} className="stroke-[3]" />
-            Offer Accepted / Hired
+          <span style={{ padding: '4px 12px', borderRadius: '9999px', fontSize: '0.75rem', fontWeight: 800, background: '#16a34a', color: '#ffffff', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+            <CheckCircle2 size={13} />
+            Hired
           </span>
         );
       case 'INTERVIEW':
         return (
-          <span className="px-3 py-1 rounded-full text-xs font-black bg-emerald-500/20 text-emerald-300 border-2 border-emerald-500/50 flex items-center gap-1.5">
+          <span style={{ padding: '4px 12px', borderRadius: '9999px', fontSize: '0.75rem', fontWeight: 800, background: '#ecfdf5', color: '#15803d', border: '1px solid #86efac', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
             <Calendar size={13} />
             Interview Scheduled
           </span>
         );
       case 'SHORTLISTED':
         return (
-          <span className="px-3 py-1 rounded-full text-xs font-black bg-white/20 text-white border-2 border-white/40 flex items-center gap-1.5">
-            <Sparkles size={13} className="text-emerald-400" />
+          <span style={{ padding: '4px 12px', borderRadius: '9999px', fontSize: '0.75rem', fontWeight: 800, background: '#ecfdf5', color: '#15803d', border: '1px solid #86efac', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+            <Sparkles size={13} />
             Shortlisted ⭐
           </span>
         );
       case 'UNDER_REVIEW':
         return (
-          <span className="px-3 py-1 rounded-full text-xs font-bold bg-white/10 text-slate-200 border border-white/20 flex items-center gap-1.5">
+          <span style={{ padding: '4px 12px', borderRadius: '9999px', fontSize: '0.75rem', fontWeight: 700, background: '#f8fafc', color: '#475569', border: '1px solid #cbd5e1', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
             <Clock size={13} />
-            Under Recruiter Review
+            Under Review
           </span>
         );
       case 'REJECTED':
         return (
-          <span className="px-3 py-1 rounded-full text-xs font-black bg-red-500/20 text-red-300 border-2 border-red-500/50 flex items-center gap-1.5">
-            <XCircle size={13} className="stroke-[2.5]" />
-            Application Declined
+          <span style={{ padding: '4px 12px', borderRadius: '9999px', fontSize: '0.75rem', fontWeight: 800, background: '#fef2f2', color: '#b91c1c', border: '1px solid #fca5a5', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+            <XCircle size={13} />
+            Declined
           </span>
         );
       default:
         return (
-          <span className="px-3 py-1 rounded-full text-xs font-bold bg-white/10 text-slate-300 border border-white/15">
-            Application Received
+          <span style={{ padding: '4px 12px', borderRadius: '9999px', fontSize: '0.75rem', fontWeight: 700, background: '#f1f5f9', color: '#475569' }}>
+            Application Sent
           </span>
         );
     }
@@ -89,146 +87,147 @@ export default function CandidateApplications({ candidate, onSelectJobId }) {
     if (filterStatus === 'ALL') return true;
     if (filterStatus === 'SUCCESS') return ['HIRED', 'SHORTLISTED', 'INTERVIEW'].includes(app.status);
     if (filterStatus === 'DECLINED') return app.status === 'REJECTED';
-    if (filterStatus === 'ACTIVE') return ['APPLIED', 'UNDER_REVIEW'].includes(app.status);
     return true;
   });
 
   return (
-    <div className="max-w-5xl mx-auto space-y-6">
+    <div className="naukri-container" style={{ maxWidth: '1000px' }}>
       
       {/* Header */}
-      <div className="glass-panel p-6 rounded-3xl border border-white/20 bg-slate-900 shadow-xl flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div style={{ background: '#ffffff', borderRadius: '12px', border: '1px solid #e2e8f0', padding: '24px', marginBottom: '20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', boxShadow: 'var(--shadow-card)', flexWrap: 'wrap', gap: '16px' }}>
         <div>
-          <div className="flex items-center gap-2 mb-1">
-            <span className="text-xs font-black uppercase tracking-wider text-emerald-400 flex items-center gap-1">
-              <FileText size={14} />
-              Applicant Tracking System
-            </span>
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '0.75rem', fontWeight: 800, color: '#16a34a', textTransform: 'uppercase', marginBottom: '4px' }}>
+            <FileText size={14} />
+            Job Application Tracker
           </div>
-          <h1 className="text-2xl sm:text-3xl font-black text-white">
-            My Tracked Job Applications
+          <h1 style={{ fontSize: '1.75rem', fontWeight: 800, color: '#0f172a' }}>
+            My Applied Jobs
           </h1>
-          <p className="text-xs text-slate-300 mt-1">
-            Review your submissions, skill compatibility ratings, and hiring pipeline status updates.
+          <p style={{ fontSize: '0.85rem', color: '#64748b' }}>
+            Monitor review stages, interview schedules, and recruiter decisions.
           </p>
         </div>
 
-        <div className="flex items-center gap-2">
-          <div className="px-4 py-2 rounded-2xl bg-white/10 text-white font-extrabold text-sm border border-white/20 text-center">
-            <div className="text-xl font-black text-emerald-400">{applications.length}</div>
-            <div className="text-[10px] uppercase text-slate-300">Total Applied</div>
-          </div>
+        <div style={{ textAlign: 'center', background: '#ecfdf5', border: '1px solid #86efac', padding: '8px 18px', borderRadius: '8px' }}>
+          <div style={{ fontSize: '1.5rem', fontWeight: 900, color: '#15803d' }}>{applications.length}</div>
+          <div style={{ fontSize: '0.7rem', fontWeight: 700, color: '#166534', textTransform: 'uppercase' }}>Total Applied</div>
         </div>
       </div>
 
-      {/* Interactive Status Filters */}
-      <div className="flex items-center gap-2 flex-wrap">
-        <span className="text-xs font-bold text-slate-300 uppercase tracking-wider mr-1 flex items-center gap-1">
-          <Filter size={13} />
-          Filter:
-        </span>
+      {/* Filter Tabs */}
+      <div style={{ display: 'flex', gap: '8px', marginBottom: '16px' }}>
         <button
           onClick={() => setFilterStatus('ALL')}
-          className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all border ${
-            filterStatus === 'ALL'
-              ? 'bg-white text-slate-900 border-white shadow-md'
-              : 'bg-white/5 text-slate-300 border-white/15 hover:bg-white/10 hover:text-white'
-          }`}
+          className="btn btn-sm"
+          style={{
+            background: filterStatus === 'ALL' ? '#16a34a' : '#ffffff',
+            color: filterStatus === 'ALL' ? '#ffffff' : '#475569',
+            border: '1px solid',
+            borderColor: filterStatus === 'ALL' ? '#16a34a' : '#cbd5e1',
+            borderRadius: '9999px'
+          }}
         >
-          All ({applications.length})
+          All Applications ({applications.length})
         </button>
+
         <button
           onClick={() => setFilterStatus('SUCCESS')}
-          className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all border ${
-            filterStatus === 'SUCCESS'
-              ? 'bg-emerald-500 text-white border-emerald-400 shadow-md shadow-emerald-500/30'
-              : 'bg-emerald-950/30 text-emerald-300 border-emerald-500/30 hover:bg-emerald-900/40'
-          }`}
+          className="btn btn-sm"
+          style={{
+            background: filterStatus === 'SUCCESS' ? '#16a34a' : '#ffffff',
+            color: filterStatus === 'SUCCESS' ? '#ffffff' : '#15803d',
+            border: '1px solid',
+            borderColor: filterStatus === 'SUCCESS' ? '#16a34a' : '#86efac',
+            borderRadius: '9999px'
+          }}
         >
-          Active / Shortlisted ({applications.filter(a => ['HIRED', 'SHORTLISTED', 'INTERVIEW'].includes(a.status)).length})
+          Shortlisted / Interview ({applications.filter(a => ['HIRED', 'SHORTLISTED', 'INTERVIEW'].includes(a.status)).length})
         </button>
+
         <button
           onClick={() => setFilterStatus('DECLINED')}
-          className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all border ${
-            filterStatus === 'DECLINED'
-              ? 'bg-red-500 text-white border-red-400 shadow-md shadow-red-500/30'
-              : 'bg-red-950/30 text-red-300 border-red-500/30 hover:bg-red-900/40'
-          }`}
+          className="btn btn-sm"
+          style={{
+            background: filterStatus === 'DECLINED' ? '#dc2626' : '#ffffff',
+            color: filterStatus === 'DECLINED' ? '#ffffff' : '#b91c1c',
+            border: '1px solid',
+            borderColor: filterStatus === 'DECLINED' ? '#dc2626' : '#fca5a5',
+            borderRadius: '9999px'
+          }}
         >
           Declined ({applications.filter(a => a.status === 'REJECTED').length})
         </button>
       </div>
 
       {loading ? (
-        <div className="py-20 text-center text-slate-400">Loading your applications...</div>
+        <div style={{ padding: '60px', textAlign: 'center', color: '#64748b' }}>Loading applications...</div>
       ) : filtered.length === 0 ? (
-        <div className="glass-panel p-12 text-center rounded-3xl border border-white/15 bg-slate-900/90">
-          <div className="w-14 h-14 rounded-2xl bg-white/10 flex items-center justify-center text-slate-300 mx-auto mb-4 border border-white/20">
-            <Inbox size={28} />
-          </div>
-          <h3 className="text-lg font-bold text-white mb-1">No Applications In This Category</h3>
-          <p className="text-xs text-slate-300 max-w-sm mx-auto mb-4">
-            Browse open positions on the job board to find roles matching your tech stack.
-          </p>
+        <div style={{ background: '#ffffff', borderRadius: '12px', border: '1px solid #e2e8f0', padding: '48px', textAlign: 'center' }}>
+          <Inbox size={36} style={{ color: '#94a3b8', margin: '0 auto 12px' }} />
+          <h3 style={{ fontSize: '1rem', fontWeight: 700, color: '#0f172a', marginBottom: '4px' }}>No applications in this category</h3>
+          <p style={{ fontSize: '0.85rem', color: '#64748b' }}>Explore open jobs on the search page to apply for new roles.</p>
         </div>
       ) : (
-        <div className="space-y-4">
+        <div>
           {filtered.map((app) => (
             <div 
-              key={app.id} 
-              className="glass-panel p-5 sm:p-6 rounded-3xl border border-white/20 bg-slate-900/90 hover:border-emerald-500/50 hover:shadow-xl transition-all flex flex-col md:flex-row md:items-center justify-between gap-5"
+              key={app.id}
+              style={{
+                background: '#ffffff',
+                border: '1px solid #e2e8f0',
+                borderRadius: '10px',
+                padding: '20px',
+                marginBottom: '12px',
+                boxShadow: 'var(--shadow-card)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                flexWrap: 'wrap',
+                gap: '16px'
+              }}
             >
-              <div className="space-y-3">
-                <div className="flex items-center gap-2 flex-wrap">
-                  <span className="text-xs font-black px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 uppercase tracking-wider flex items-center gap-1">
-                    <Building2 size={13} />
+              <div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
+                  <span style={{ fontSize: '0.8rem', fontWeight: 800, color: '#166534', background: '#ecfdf5', padding: '2px 8px', borderRadius: '4px' }}>
                     {app.company}
                   </span>
-                  <span className="text-xs text-slate-400 flex items-center gap-1 font-medium">
-                    <Calendar size={13} />
+                  <span style={{ fontSize: '0.75rem', color: '#64748b', display: 'flex', alignItems: 'center', gap: '3px' }}>
+                    <Calendar size={12} />
                     Applied on {new Date(app.appliedAt).toLocaleDateString()}
                   </span>
                 </div>
 
-                <h3 className="text-xl font-black text-white">
+                <h3 style={{ fontSize: '1.1rem', fontWeight: 800, color: '#0f172a', marginBottom: '8px' }}>
                   {app.jobTitle}
                 </h3>
 
-                {/* Matched Skills List in Green */}
+                {/* Matched Skills */}
                 {app.matchedSkills && app.matchedSkills.length > 0 && (
-                  <div className="flex items-center gap-1.5 flex-wrap">
-                    <span className="text-xs font-bold text-emerald-400 uppercase tracking-wider">
-                      Matched Skills:
-                    </span>
-                    {app.matchedSkills.map((skill, idx) => (
-                      <span key={idx} className="skill-chip matched text-xs font-bold">
-                        {skill}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '5px', flexWrap: 'wrap' }}>
+                    <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#475569' }}>Matched Skills:</span>
+                    {app.matchedSkills.map((sk, idx) => (
+                      <span key={idx} className="skill-chip matched" style={{ fontSize: '0.7rem' }}>
+                        {sk}
                       </span>
                     ))}
                   </div>
                 )}
 
                 {app.coverNote && (
-                  <div className="text-xs text-slate-300 bg-slate-950/70 p-3 rounded-xl border border-white/10 max-w-xl italic">
+                  <div style={{ fontSize: '0.75rem', color: '#475569', fontStyle: 'italic', marginTop: '8px', background: '#f8fafc', padding: '6px 10px', borderRadius: '6px', border: '1px solid #e2e8f0' }}>
                     "{app.coverNote}"
                   </div>
                 )}
               </div>
 
               {/* Status and Match Score */}
-              <div className="flex md:flex-col items-center md:items-end justify-between md:justify-center gap-4 shrink-0 pt-4 md:pt-0 border-t md:border-t-0 border-slate-800">
-                <div className="flex flex-col items-start md:items-end gap-1">
-                  <span className="text-[11px] text-slate-400 font-bold uppercase tracking-wider">Review Status</span>
-                  {getStatusBadge(app.status)}
-                </div>
-
-                <div className="flex items-center gap-2">
-                  <MatchScoreBadge 
-                    score={app.matchScore} 
-                    size="sm"
-                  />
+              <div style={{ textAlign: 'right', display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '8px' }}>
+                <div>{getStatusBadge(app.status)}</div>
+                <div style={{ fontSize: '0.85rem', fontWeight: 800, color: '#15803d', background: '#ecfdf5', border: '1px solid #86efac', padding: '3px 8px', borderRadius: '6px' }}>
+                  {app.matchScore}% Compatibility
                 </div>
               </div>
+
             </div>
           ))}
         </div>

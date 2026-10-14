@@ -9,13 +9,10 @@ import {
   Check,
   X,
   Info,
-  ArrowRight,
-  TrendingUp,
   Sliders,
   Code2
 } from 'lucide-react';
 import { matchApi } from '../services/api';
-import MatchScoreBadge from './MatchScoreBadge';
 
 const FREQUENT_SKILLS = [
   'Java', 'Spring Boot', 'React', 'MongoDB', 'SQL', 'Git', 'Docker', 
@@ -36,28 +33,22 @@ export default function SkillMatcherCalculator() {
       required: 'Java, React, SQL, Git',
     },
     {
-      name: 'Full Stack Java (80%)',
+      name: 'Senior Full Stack (80%)',
       desc: '4 of 5 required skills present',
       candidate: 'Java, Spring Boot, MongoDB, REST APIs, Git, Docker',
       required: 'Java, Spring Boot, MongoDB, REST APIs, Kubernetes',
     },
     {
-      name: 'Perfect 100% Fit',
+      name: '100% Fit',
       desc: 'All requirements satisfied',
-      candidate: 'React, TypeScript, JavaScript, CSS, HTML, Redux',
+      candidate: 'React, TypeScript, JavaScript, CSS, HTML',
       required: 'React, TypeScript, JavaScript, CSS',
     },
     {
-      name: 'Synonym Equivalence (100%)',
+      name: 'Synonym Mapping (100%)',
       desc: 'React.js = React, SpringBoot = Spring Boot',
       candidate: 'React.js, SpringBoot, Mongo DB, REST APIs',
       required: 'React, Spring Boot, Mongo, REST API',
-    },
-    {
-      name: 'Skill Gap / Low Fit (25%)',
-      desc: 'Major skill gap detected',
-      candidate: 'Python, Django',
-      required: 'Java, Spring Boot, React, MongoDB',
     }
   ];
 
@@ -115,177 +106,155 @@ export default function SkillMatcherCalculator() {
   const candidateList = candidateSkillsInput.split(',').map(s => s.trim()).filter(Boolean);
   const requiredList = requiredSkillsInput.split(',').map(s => s.trim()).filter(Boolean);
 
+  const score = result?.matchPercentage ?? 0;
+
   return (
-    <div className="max-w-5xl mx-auto space-y-6">
+    <div className="naukri-container" style={{ maxWidth: '1000px' }}>
       
-      {/* Header Banner */}
-      <div className="glass-panel p-6 sm:p-8 rounded-3xl border border-white/20 relative overflow-hidden bg-gradient-to-br from-slate-900 via-slate-900 to-emerald-950/40">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      {/* Header Banner (Naukri Career Tool style) */}
+      <div style={{ background: '#ffffff', borderRadius: '12px', border: '1px solid #e2e8f0', padding: '28px', marginBottom: '24px', boxShadow: 'var(--shadow-card)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '16px', flexWrap: 'wrap' }}>
           <div>
-            <div className="flex items-center gap-2 mb-2">
-              <span className="text-xs font-black px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 uppercase tracking-wider flex items-center gap-1.5">
-                <Calculator size={14} />
-                Live Algorithm Sandbox
-              </span>
-              <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-white/10 text-white">
-                Green = Matched • Red = Missing
-              </span>
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '3px 10px', borderRadius: '4px', background: '#ecfdf5', color: '#166534', fontSize: '0.75rem', fontWeight: 800, textTransform: 'uppercase', marginBottom: '8px' }}>
+              <Calculator size={13} />
+              Career Skill Match Calculator
             </div>
-            <h1 className="text-2xl sm:text-3xl font-black text-white">
-              Skill Overlap & Compatibility Engine
+            <h1 style={{ fontSize: '1.75rem', fontWeight: 800, color: '#0f172a', marginBottom: '6px' }}>
+              Skill Overlap & Benchmark Engine
             </h1>
-            <p className="text-xs sm:text-sm text-slate-300 max-w-2xl mt-1 leading-relaxed">
-              Dynamically simulate candidates against job requirements. Click skill pills below or type your own to see real-time match scores computed by the Spring Boot backend service.
+            <p style={{ fontSize: '0.875rem', color: '#64748b', maxWidth: '640px' }}>
+              Simulate candidate vs employer skill requirements. Watch how Spring Boot evaluates matches using the transparent overlap equation: <span style={{ fontWeight: 700, color: '#0f172a' }}>Match = (Matched / Total Required) &times; 100</span>.
             </p>
           </div>
 
-          <div className="shrink-0 flex items-center gap-2">
-            <button
-              onClick={() => {
-                setCandidateSkillsInput('Java, React, Git');
-                setRequiredSkillsInput('Java, React, SQL, Git');
-              }}
-              className="btn btn-secondary text-xs"
-            >
-              <RotateCcw size={14} />
-              Reset Inputs
-            </button>
-          </div>
+          <button
+            onClick={() => {
+              setCandidateSkillsInput('Java, React, Git');
+              setRequiredSkillsInput('Java, React, SQL, Git');
+            }}
+            className="btn btn-secondary btn-sm"
+          >
+            <RotateCcw size={14} />
+            Reset Defaults
+          </button>
         </div>
 
         {/* Quick Presets */}
-        <div className="mt-6 pt-4 border-t border-white/10 flex items-center gap-2 flex-wrap">
-          <span className="text-xs font-bold text-white uppercase tracking-wider">Test Cases:</span>
-          {presets.map((preset, idx) => (
+        <div style={{ marginTop: '18px', paddingTop: '16px', borderTop: '1px solid #f1f5f9', display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+          <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#475569', textTransform: 'uppercase' }}>Test Scenarios:</span>
+          {presets.map((p, idx) => (
             <button
               key={idx}
-              onClick={() => loadPreset(preset)}
-              className="text-xs font-semibold px-3 py-1.5 rounded-full bg-white/10 hover:bg-emerald-500 hover:text-white text-slate-200 border border-white/15 transition-all shadow-sm"
-              title={preset.desc}
+              onClick={() => loadPreset(p)}
+              className="naukri-trending-chip"
+              style={{ fontSize: '0.75rem', fontWeight: 600 }}
             >
-              {preset.name}
+              {p.name}
             </button>
           ))}
         </div>
       </div>
 
-      {/* Interactive Calculation Result Banner */}
+      {/* Live Calculation Card */}
       {result && (
-        <div className="glass-panel p-6 sm:p-8 rounded-3xl border-2 border-white/20 bg-slate-900 shadow-2xl space-y-6">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 pb-6 border-b border-slate-800">
+        <div style={{ background: '#ffffff', borderRadius: '12px', border: '1px solid #e2e8f0', padding: '24px', marginBottom: '24px', boxShadow: 'var(--shadow-card)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingBottom: '16px', borderBottom: '1px solid #f1f5f9', marginBottom: '16px', flexWrap: 'wrap', gap: '12px' }}>
             <div>
-              <span className="text-xs font-extrabold uppercase tracking-wider text-slate-400">
-                Calculated Candidate Match Rating
-              </span>
-              <div className="flex items-baseline gap-3 mt-1">
-                <span className={`text-4xl sm:text-5xl font-black tracking-tight ${
-                  result.matchPercentage >= 70 ? 'text-emerald-400' : result.matchPercentage >= 50 ? 'text-amber-400' : 'text-red-400'
-                }`}>
-                  {result.matchPercentage}%
+              <div style={{ fontSize: '0.75rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase' }}>Calculated Match Score</div>
+              <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px', marginTop: '2px' }}>
+                <span style={{ fontSize: '2.5rem', fontWeight: 900, color: score >= 70 ? '#16a34a' : score >= 50 ? '#d97706' : '#dc2626' }}>
+                  {score}%
                 </span>
-                <span className="text-sm font-bold text-white uppercase px-3 py-1 rounded-full bg-white/10 border border-white/20">
-                  {result.tier} Compatibility
+                <span style={{ fontSize: '0.85rem', fontWeight: 700, padding: '3px 10px', borderRadius: '9999px', background: score >= 70 ? '#ecfdf5' : '#fef2f2', color: score >= 70 ? '#166534' : '#991b1b' }}>
+                  {result.tier}
                 </span>
               </div>
-              <p className="text-xs text-slate-300 mt-2 font-medium">
+              <p style={{ fontSize: '0.8rem', color: '#475569', marginTop: '4px' }}>
                 {result.explanation}
               </p>
             </div>
 
-            <MatchScoreBadge 
-              score={result.matchPercentage}
-              matchedCount={result.matchedCount}
-              totalCount={result.totalRequiredCount}
-              size="lg"
-            />
-          </div>
-
-          {/* Visual Dual Progress Balance Meter: Green (Matched) vs Red (Missing) */}
-          <div className="space-y-2">
-            <div className="flex items-center justify-between text-xs font-bold">
-              <span className="text-emerald-400 flex items-center gap-1.5">
-                <CheckCircle2 size={14} />
-                Matched: {result.matchedCount} of {result.totalRequiredCount} skills ({result.matchPercentage}%)
-              </span>
-              <span className="text-red-400 flex items-center gap-1.5">
-                <XCircle size={14} />
-                Missing: {result.totalRequiredCount - result.matchedCount} skills ({Math.max(0, 100 - result.matchPercentage).toFixed(1)}%)
-              </span>
-            </div>
-
-            <div className="h-4 rounded-full bg-slate-950 p-0.5 border border-white/20 overflow-hidden flex shadow-inner">
-              <div 
-                className="h-full rounded-l-full bg-gradient-to-r from-emerald-500 to-emerald-400 transition-all duration-500 shadow-lg shadow-emerald-500/50"
-                style={{ width: `${result.matchPercentage}%` }}
-              />
-              <div 
-                className="h-full rounded-r-full bg-gradient-to-r from-red-500 to-red-600 transition-all duration-500 shadow-lg shadow-red-500/50"
-                style={{ width: `${Math.max(0, 100 - result.matchPercentage)}%` }}
-              />
-            </div>
-          </div>
-
-          {/* Mathematical Formula Explanation Card */}
-          <div className="p-4 rounded-2xl bg-slate-950 border border-white/15 font-mono text-xs text-slate-200">
-            <div className="text-[11px] font-bold text-emerald-400 uppercase tracking-wider mb-1.5 flex items-center gap-1.5 font-sans">
-              <Info size={14} />
-              <span>Project Specification Matching Rule</span>
-            </div>
-            <div className="text-sm font-extrabold text-white">
-              Formula: Match score = ({result.matchedCount} matched / {result.totalRequiredCount} required) × 100 = <span className="text-emerald-400 font-black">{result.matchPercentage}%</span>
-            </div>
-          </div>
-
-          {/* Detailed Skill Breakdown: Green Matched vs Red Missing */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5 pt-2">
-            {/* Green Matched Column */}
-            <div className="p-4 rounded-2xl bg-emerald-950/40 border-2 border-emerald-500/40 shadow-lg shadow-emerald-950/20">
-              <div className="text-xs font-black text-emerald-300 uppercase tracking-wider flex items-center justify-between mb-3 pb-2 border-b border-emerald-500/30">
-                <span className="flex items-center gap-1.5">
-                  <CheckCircle2 size={16} className="text-emerald-400 stroke-[2.5]" />
-                  <span>Matched Skills ({result.matchedSkills?.length || 0})</span>
-                </span>
-                <span className="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 font-bold text-[11px]">
-                  + Score Points
-                </span>
+            {/* Large Progress Gauge */}
+            <div style={{ textAlign: 'center', padding: '12px 20px', borderRadius: '10px', background: '#f8fafc', border: '1px solid #e2e8f0' }}>
+              <div style={{ fontSize: '0.75rem', fontWeight: 700, color: '#64748b' }}>Matched Skills</div>
+              <div style={{ fontSize: '1.5rem', fontWeight: 800, color: '#16a34a' }}>
+                {result.matchedCount} <span style={{ fontSize: '0.9rem', color: '#64748b', fontWeight: 500 }}>/ {result.totalRequiredCount}</span>
               </div>
-              <div className="flex flex-wrap gap-2">
+            </div>
+          </div>
+
+          {/* Dual Balance Progress Bar: Green (Matched) vs Red (Missing) */}
+          <div style={{ marginBottom: '16px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', fontWeight: 700, marginBottom: '6px' }}>
+              <span style={{ color: '#15803d', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                <CheckCircle2 size={13} />
+                Matched: {result.matchedCount} of {result.totalRequiredCount} ({score}%)
+              </span>
+              <span style={{ color: '#b91c1c', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                <XCircle size={13} />
+                Missing: {result.totalRequiredCount - result.matchedCount} ({Math.max(0, 100 - score).toFixed(1)}%)
+              </span>
+            </div>
+
+            <div style={{ height: '12px', background: '#fee2e2', borderRadius: '9999px', overflow: 'hidden', display: 'flex' }}>
+              <div 
+                style={{ 
+                  height: '100%', 
+                  background: '#16a34a', 
+                  width: `${score}%`,
+                  transition: 'width 0.4s ease'
+                }} 
+              />
+              <div 
+                style={{ 
+                  height: '100%', 
+                  background: '#dc2626', 
+                  width: `${Math.max(0, 100 - score)}%`,
+                  transition: 'width 0.4s ease'
+                }} 
+              />
+            </div>
+          </div>
+
+          {/* Breakdown: Green Matched vs Red Missing */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
+            {/* Matched */}
+            <div style={{ background: '#ecfdf5', border: '1px solid #86efac', borderRadius: '8px', padding: '12px' }}>
+              <div style={{ fontSize: '0.75rem', fontWeight: 800, color: '#166534', textTransform: 'uppercase', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                <Check size={12} strokeWidth={3} />
+                <span>Matched Skills ({result.matchedSkills?.length || 0})</span>
+              </div>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
                 {result.matchedSkills?.length > 0 ? (
-                  result.matchedSkills.map((s, i) => (
-                    <span key={i} className="skill-chip matched text-xs font-bold">
-                      <Check size={12} className="stroke-[3]" />
-                      {s}
+                  result.matchedSkills.map((sk, i) => (
+                    <span key={i} className="skill-chip matched">
+                      <Check size={10} strokeWidth={3} />
+                      {sk}
                     </span>
                   ))
                 ) : (
-                  <span className="text-xs text-slate-400 italic">No skills currently match the job criteria</span>
+                  <span style={{ fontSize: '0.75rem', color: '#64748b', fontStyle: 'italic' }}>None matched</span>
                 )}
               </div>
             </div>
 
-            {/* Red Missing Column */}
-            <div className="p-4 rounded-2xl bg-red-950/40 border-2 border-red-500/40 shadow-lg shadow-red-950/20">
-              <div className="text-xs font-black text-red-300 uppercase tracking-wider flex items-center justify-between mb-3 pb-2 border-b border-red-500/30">
-                <span className="flex items-center gap-1.5">
-                  <XCircle size={16} className="text-red-400 stroke-[2.5]" />
-                  <span>Missing Requirements ({result.missingSkills?.length || 0})</span>
-                </span>
-                <span className="px-2 py-0.5 rounded-full bg-red-500/20 text-red-300 font-bold text-[11px]">
-                  Skills to Learn
-                </span>
+            {/* Missing */}
+            <div style={{ background: '#fef2f2', border: '1px solid #fca5a5', borderRadius: '8px', padding: '12px' }}>
+              <div style={{ fontSize: '0.75rem', fontWeight: 800, color: '#991b1b', textTransform: 'uppercase', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                <X size={12} strokeWidth={3} />
+                <span>Missing Requirements ({result.missingSkills?.length || 0})</span>
               </div>
-              <div className="flex flex-wrap gap-2">
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
                 {result.missingSkills?.length > 0 ? (
-                  result.missingSkills.map((s, i) => (
-                    <span key={i} className="skill-chip missing text-xs font-bold">
-                      <X size={12} className="stroke-[3]" />
-                      {s}
+                  result.missingSkills.map((sk, i) => (
+                    <span key={i} className="skill-chip missing">
+                      <X size={10} strokeWidth={3} />
+                      {sk}
                     </span>
                   ))
                 ) : (
-                  <span className="text-xs text-emerald-400 font-bold flex items-center gap-1.5">
-                    <CheckCircle2 size={14} />
-                    All requirements satisfied! Zero missing skills.
+                  <span style={{ fontSize: '0.75rem', color: '#16a34a', fontWeight: 700 }}>
+                    100% Fit! All skills present.
                   </span>
                 )}
               </div>
@@ -294,108 +263,95 @@ export default function SkillMatcherCalculator() {
         </div>
       )}
 
-      {/* Two Column Interactive Input Panels */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      {/* Two Column Editor for Candidate Skills vs Job Requirements */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
         
-        {/* Candidate Profile Skills Editor */}
-        <div className="glass-panel p-6 rounded-3xl border border-white/15 bg-slate-900/90 space-y-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <label className="text-xs font-extrabold uppercase tracking-wider text-emerald-400 flex items-center gap-1.5">
-                <CheckCircle2 size={15} />
-                <span>Candidate Profile Skills</span>
-              </label>
-              <p className="text-[11px] text-slate-400">Skills listed on applicant's profile</p>
-            </div>
-            <span className="text-xs font-bold px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
-              {candidateList.length} skills
-            </span>
+        {/* Candidate Skills Input Box */}
+        <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '20px', boxShadow: 'var(--shadow-card)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+            <label className="form-label" style={{ color: '#16a34a' }}>
+              Candidate Skills Profile ({candidateList.length})
+            </label>
+            <span style={{ fontSize: '0.7rem', color: '#64748b' }}>Comma-separated</span>
           </div>
 
           <textarea
             rows="3"
-            className="form-control font-mono text-xs font-semibold"
+            className="form-control"
             value={candidateSkillsInput}
             onChange={(e) => setCandidateSkillsInput(e.target.value)}
-            placeholder="Type candidate skills separated by commas..."
+            style={{ marginBottom: '12px', fontSize: '0.85rem' }}
           />
 
-          {/* Interactive 1-click Quick Toggles */}
-          <div>
-            <div className="text-[11px] font-bold text-white uppercase tracking-wider mb-2 flex items-center justify-between">
-              <span>Click to add/remove candidate skills:</span>
-            </div>
-            <div className="flex flex-wrap gap-1.5">
-              {FREQUENT_SKILLS.map((sk, idx) => {
-                const isSelected = candidateList.some(s => s.toLowerCase() === sk.toLowerCase());
-                return (
-                  <button
-                    key={idx}
-                    type="button"
-                    onClick={() => toggleCandidateSkill(sk)}
-                    className={`px-2.5 py-1 rounded-full text-xs font-bold transition-all flex items-center gap-1 border ${
-                      isSelected 
-                        ? 'bg-emerald-500 text-white border-emerald-400 shadow-sm shadow-emerald-500/30' 
-                        : 'bg-white/5 text-slate-300 border-white/10 hover:bg-white/10 hover:text-white'
-                    }`}
-                  >
-                    {isSelected ? <Check size={11} className="stroke-[3]" /> : <Plus size={11} />}
-                    {sk}
-                  </button>
-                );
-              })}
-            </div>
+          <div style={{ fontSize: '0.75rem', fontWeight: 700, color: '#475569', marginBottom: '6px' }}>
+            Click to add/remove skills:
+          </div>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
+            {FREQUENT_SKILLS.map((sk, idx) => {
+              const active = candidateList.some(s => s.toLowerCase() === sk.toLowerCase());
+              return (
+                <button
+                  key={idx}
+                  type="button"
+                  onClick={() => toggleCandidateSkill(sk)}
+                  className="skill-chip"
+                  style={{
+                    background: active ? '#ecfdf5' : '#f8fafc',
+                    borderColor: active ? '#86efac' : '#cbd5e1',
+                    color: active ? '#15803d' : '#475569',
+                    cursor: 'pointer'
+                  }}
+                >
+                  {active ? <Check size={10} strokeWidth={3} /> : <Plus size={10} />}
+                  {sk}
+                </button>
+              );
+            })}
           </div>
         </div>
 
-        {/* Job Required Skills Editor */}
-        <div className="glass-panel p-6 rounded-3xl border border-white/15 bg-slate-900/90 space-y-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <label className="text-xs font-extrabold uppercase tracking-wider text-white flex items-center gap-1.5">
-                <Code2 size={15} className="text-emerald-400" />
-                <span>Job Required Skills</span>
-              </label>
-              <p className="text-[11px] text-slate-400">Strict requirements posted by employer</p>
-            </div>
-            <span className="text-xs font-bold px-2 py-0.5 rounded bg-white/10 text-white border border-white/20">
-              {requiredList.length} skills
-            </span>
+        {/* Job Required Skills Box */}
+        <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '20px', boxShadow: 'var(--shadow-card)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+            <label className="form-label">
+              Employer Job Requirements ({requiredList.length})
+            </label>
+            <span style={{ fontSize: '0.7rem', color: '#64748b' }}>Comma-separated</span>
           </div>
 
           <textarea
             rows="3"
-            className="form-control font-mono text-xs font-semibold"
+            className="form-control"
             value={requiredSkillsInput}
             onChange={(e) => setRequiredSkillsInput(e.target.value)}
-            placeholder="Type required job skills separated by commas..."
+            style={{ marginBottom: '12px', fontSize: '0.85rem' }}
           />
 
-          {/* Interactive 1-click Quick Toggles for Job Requirements */}
-          <div>
-            <div className="text-[11px] font-bold text-white uppercase tracking-wider mb-2 flex items-center justify-between">
-              <span>Click to add/remove job requirements:</span>
-            </div>
-            <div className="flex flex-wrap gap-1.5">
-              {FREQUENT_SKILLS.map((sk, idx) => {
-                const isSelected = requiredList.some(s => s.toLowerCase() === sk.toLowerCase());
-                return (
-                  <button
-                    key={idx}
-                    type="button"
-                    onClick={() => toggleRequiredSkill(sk)}
-                    className={`px-2.5 py-1 rounded-full text-xs font-bold transition-all flex items-center gap-1 border ${
-                      isSelected 
-                        ? 'bg-white text-slate-900 border-white shadow-sm font-extrabold' 
-                        : 'bg-white/5 text-slate-300 border-white/10 hover:bg-white/10 hover:text-white'
-                    }`}
-                  >
-                    {isSelected ? <Check size={11} className="stroke-[3]" /> : <Plus size={11} />}
-                    {sk}
-                  </button>
-                );
-              })}
-            </div>
+          <div style={{ fontSize: '0.75rem', fontWeight: 700, color: '#475569', marginBottom: '6px' }}>
+            Click to add/remove requirements:
+          </div>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
+            {FREQUENT_SKILLS.map((sk, idx) => {
+              const active = requiredList.some(s => s.toLowerCase() === sk.toLowerCase());
+              return (
+                <button
+                  key={idx}
+                  type="button"
+                  onClick={() => toggleRequiredSkill(sk)}
+                  className="skill-chip"
+                  style={{
+                    background: active ? '#f1f5f9' : '#f8fafc',
+                    borderColor: active ? '#94a3b8' : '#cbd5e1',
+                    color: active ? '#0f172a' : '#475569',
+                    fontWeight: active ? 700 : 500,
+                    cursor: 'pointer'
+                  }}
+                >
+                  {active ? <Check size={10} strokeWidth={3} /> : <Plus size={10} />}
+                  {sk}
+                </button>
+              );
+            })}
           </div>
         </div>
 
